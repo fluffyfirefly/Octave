@@ -33,6 +33,7 @@ import me.devoxin.flight.api.annotations.Greedy
 import me.devoxin.flight.api.annotations.SubCommand
 import me.devoxin.flight.api.entities.Cog
 import me.devoxin.flight.internal.utils.TextSplitter
+import org.json.JSONException
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
@@ -84,7 +85,10 @@ class Lyrics : Cog {
                 }.display(tx)
             }
         }.exceptionally {
-            ctx.send(it.localizedMessage)
+            when (it) {
+                is JSONException -> ctx.send("An invalid response was returned by the API. Try again?")
+                else -> ctx.send(it.localizedMessage)
+            }
             return@exceptionally null
         }
     }
