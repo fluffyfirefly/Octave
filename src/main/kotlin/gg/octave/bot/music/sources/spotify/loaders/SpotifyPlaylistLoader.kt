@@ -44,7 +44,7 @@ class SpotifyPlaylistLoader : Loader {
         val playlistId = matcher.group(2)
         val playlistInfo = fetchPlaylistInfo(sourceManager, playlistId)
         val playlistTracks = fetchPlaylistTracks(manager, sourceManager, playlistId)
-        val playlistName = playlistInfo.optString("name")
+        val playlistName = playlistInfo.optString("name", "Untitled Playlist")
 
         return BasicAudioPlaylist(playlistName, playlistTracks, null, false)
     }

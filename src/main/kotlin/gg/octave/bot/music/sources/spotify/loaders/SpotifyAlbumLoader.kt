@@ -51,7 +51,7 @@ class SpotifyAlbumLoader : Loader {
         check(!trackList.isEmpty) { "Album $albumId track list is empty!" }
 
         val albumTracks = fetchAlbumTracks(manager, sourceManager, trackList)
-        val albumName = albumInfo.optString("name")
+        val albumName = albumInfo.optString("name", "Untitled Album")
 
         return BasicAudioPlaylist(albumName, albumTracks, null, false)
     }
