@@ -41,7 +41,7 @@ class VoteSkip : MusicCog {
     override fun requirePlayer() = true
 
     @Command(aliases = ["vs"], description = "Vote to skip the current music track.")
-    suspend fun voteskip(ctx: Context) {
+    fun voteskip(ctx: Context) {
         val manager = ctx.manager
 
         if (ctx.member!!.voiceState!!.isDeafened) {

@@ -58,10 +58,7 @@ class General : Cog {
         ctx.send {
             setColor(0x9570D3)
             setTitle("Vote")
-            setDescription(
-                "Vote here to increase the visibility of the bot!\nIf you vote for Octave, you can get a normie box in Dank Memer everytime you vote too!\n" +
-                    "**[Vote by clicking here](https://discordbots.org/bot/octave/vote)**"
-            )
+            setDescription("[Vote for Octave on discordbots.org!](https://discordbots.org/bot/octave/vote)")
         }
     }
 
