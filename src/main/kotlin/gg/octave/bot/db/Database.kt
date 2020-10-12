@@ -67,7 +67,7 @@ class Database(private val name: String) {
         try {
             conn = builder.connect()
         } catch (e: ReqlDriverError) {
-            log.error("Failed to connect to Rethink. Exiting...")
+            log.error("Failed to connect to Rethink. Exiting...", e)
             exitProcess(1)
         }
 
