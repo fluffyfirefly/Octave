@@ -106,6 +106,40 @@ class Playlists : Cog {
         })
     }
 
+    @SubCommand(description = "Share a custom playlist).")
+    fun share(ctx: Context, @Greedy name: String) {
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
+            ?: return ctx.send("You don't have any playlists with that name.")
+
+        if (!existingPlaylist.isExposed) {
+            return ctx.send {
+                setColor(0x9571D3)
+                setTitle("Whoops...")
+                setDescription("This playlist is not marked as public. If you wish to share this playlist, you will need to do the following:\n" +
+                    "**1.** `${ctx.trigger}playlists edit ${existingPlaylist.name}`\n" +
+                    "**2.** `privacy public`\n" +
+                    "**3.** `save`\n" +
+                    "**4.** `${ctx.trigger}playlists share ${existingPlaylist.name}`")
+            }
+        }
+
+        ctx.send {
+            setColor(0x9571D3)
+            setTitle("Sharing playlist \"${existingPlaylist.name}\"")
+            setDescription(
+                "Your unique playlist ID is `${existingPlaylist.id}`.\n" +
+                "Share this with your friends - it will allow them to play your playlist and even clone it!"
+            )
+            addField(
+                "Changed your mind?",
+                "Simply head over to the playlist editor (`${ctx.trigger}playlists edit ${existingPlaylist.name}`) and " +
+                    "set the privacy to private!",
+                false
+            )
+            setFooter("Sharing is caring 👏")
+        }
+    }
+
     @SubCommand(description = "Import a playlist from YouTube/SoundCloud/...")
     fun import(ctx: Context, url: URL, @Greedy name: String?) {
         if (!checkQuota(ctx)) {
