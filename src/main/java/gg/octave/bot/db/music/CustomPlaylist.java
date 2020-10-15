@@ -54,6 +54,10 @@ public class CustomPlaylist extends ManagedObject {
     @JsonDeserialize
     private boolean imported = false;
 
+    @JsonDeserialize
+    @JsonSerialize
+    private boolean exposed = false;
+
     @ConstructorProperties("id")
     public CustomPlaylist(String id) {
         super(id, "customplaylists");
@@ -80,13 +84,23 @@ public class CustomPlaylist extends ManagedObject {
     }
 
     @JsonIgnore
+    public boolean isImported() {
+        return imported;
+    }
+
+    @JsonIgnore
     public void setImported(boolean imported) {
         this.imported = imported;
     }
 
     @JsonIgnore
-    public boolean isImported() {
-        return imported;
+    public boolean isExposed() {
+        return exposed;
+    }
+
+    @JsonIgnore
+    public void setIsExposed(boolean exposed) {
+        this.exposed = exposed;
     }
 
     @JsonIgnore
