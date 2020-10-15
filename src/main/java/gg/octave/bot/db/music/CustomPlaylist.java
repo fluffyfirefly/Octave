@@ -99,7 +99,7 @@ public class CustomPlaylist extends ManagedObject {
     }
 
     @JsonIgnore
-    public void setIsExposed(boolean exposed) {
+    public void setExposed(boolean exposed) {
         this.exposed = exposed;
     }
 

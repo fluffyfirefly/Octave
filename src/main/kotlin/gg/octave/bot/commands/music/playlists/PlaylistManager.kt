@@ -71,6 +71,7 @@ class PlaylistManager(
                 `move <at #> <to #>:` Moves the track at the given index, to the new index.
                 `page <#>          :` Tabs to the given page, and displays it.
                 `rename <name>     :` Rename the playlist.
+                `privacy <setting> :` Sets whether the playlist is public or private.
                 `resend            :` Re-sends the track list.
                 `save              :` Saves any modifications made to the playlist.
                 `exit              :` Exits playlist editing mode, discarding any changes.
@@ -111,9 +112,10 @@ class PlaylistManager(
             .takeIf { it.isNotEmpty() }
             ?: "No tracks to display."
 
+        val lockStatus = if (playlist.isExposed) "\uD83D\uDD13" else "\uD83D\uDD12"
         val embed = EmbedBuilder().apply {
             setColor(0x9571D3)
-            setTitle("Editing ${playlist.name} | ${ctx.author.name}'s playlist")
+            setTitle("Editing ${playlist.name} | ${ctx.author.name}'s playlist ($lockStatus)")
             setDescription(trackList)
             addField(
                 "The bot will be listening for commands until you run `save` or `exit`, or no commands are sent for 20 seconds.",
@@ -190,6 +192,19 @@ class PlaylistManager(
 
                 true
             }
+            "privacy" -> {
+                val arg = args.firstOrNull()?.toLowerCase()
+
+                if (arg != "private" && arg != "public") {
+                    ctx.send("You need to specify `public` or `private`.\n" +
+                        "Setting your playlist to public means users will be able to play it, and clone it to their own library.")
+                } else {
+                    playlist.isExposed = arg == "public"
+                    renderPage()
+                }
+
+                true
+            }
             "resend" -> {
                 renderPage(true)
                 true
@@ -232,7 +247,7 @@ class PlaylistManager(
         private val DEFAULT_PREDICATE: (Long, Long) -> (MessageReceivedEvent) -> Boolean = { authorId, channelId ->
             { it.author.idLong == authorId && it.channel.idLong == channelId && isCommand(it.message) }
         }
-        private val commands = setOf("help", "remove", "move", "page", "resend", "rename", "send", "save", "exit")
+        private val commands = setOf("help", "remove", "move", "page", "privacy", "resend", "rename", "send", "save", "exit")
 
         private fun isCommand(msg: Message): Boolean {
             return commands.any { msg.contentRaw.startsWith(it) }
