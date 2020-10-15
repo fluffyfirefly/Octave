@@ -52,10 +52,12 @@ abstract class MenuBuilder<T : MenuBuilder<T>>(val waiter: EventWaiter) {
         return this as T
     }
 
-    fun setColor(color: Color?): T {
-        this.color = color
+    fun setColor(color: Int?): T {
+        this.color = color?.let(::Color)
         return this as T
     }
+
+    fun setColor(color: Color?): T = setColor(color?.rgb)
 
     fun setUser(user: User): T {
         this.user = user

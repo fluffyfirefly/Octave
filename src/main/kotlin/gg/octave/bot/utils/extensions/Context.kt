@@ -71,4 +71,4 @@ val Context.voiceChannel: VoiceChannel?
     get() = member!!.voiceState?.channel
 
 val Context.selfMember: Member?
-    get() = guild!!.selfMember
+    get() = guild?.selfMember

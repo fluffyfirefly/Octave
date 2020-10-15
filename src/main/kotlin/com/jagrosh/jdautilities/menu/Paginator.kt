@@ -20,10 +20,7 @@ import com.jagrosh.jdautilities.waiter.EventWaiter
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.MessageEmbed
-import net.dv8tion.jda.api.entities.TextChannel
-import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.api.requests.RestAction
 import java.awt.Color
@@ -56,9 +53,9 @@ class Paginator(
         paginate(channel, 1)
     }
 
-    fun display(message: Message) = display(message.textChannel)
+    fun display(channel: MessageChannel) = paginate(channel, 1)
 
-    fun paginate(channel: TextChannel, page: Int) {
+    fun paginate(channel: MessageChannel, page: Int) {
         if (list.isEmpty()) {
             return channel.sendMessage(renderEmptyPage()).queue()
         }

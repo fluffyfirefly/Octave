@@ -114,39 +114,37 @@ class BotInfo : Cog {
 
     @SubCommand(description = "Gets node statistics.")
     fun nodes(ctx: Context) {
-        ctx.textChannel?.let { tx ->
-            Launcher.eventWaiter.paginator {
-                setTitle("Node Statistics")
-                setUser(ctx.author)
-                setDescription("Per-node breakdown of the bot statistics.\nA node contains a set amount of shards.\n" +
-                    "**Current Node**: ${Launcher.configuration.nodeNumber} (${Launcher.configuration.nodeNumber + 1})")
-                setColor(ctx.selfMember?.color)
-                Launcher.database.jedisPool.resource.use {
-                    val nodeStats = it.hgetAll("node-stats")
-                    for (node in nodeStats) {
-                        val stats = JSONObject(node.value);
+        Launcher.eventWaiter.paginator {
+            setTitle("Node Statistics")
+            setUser(ctx.author)
+            setDescription("Per-node breakdown of the bot statistics.\nA node contains a set amount of shards.\n" +
+                "**Current Node**: ${Launcher.configuration.nodeNumber} (${Launcher.configuration.nodeNumber + 1})")
+            setColor(ctx.selfMember?.color?.rgb ?: 0x9570D3)
+            Launcher.database.jedisPool.resource.use {
+                val nodeStats = it.hgetAll("node-stats")
+                for (node in nodeStats) {
+                    val stats = JSONObject(node.value);
 
-                        val ramUsedBytes = stats.getLong("used_ram")
-                        val ramUsedCalculated = Capacity.calculate(ramUsedBytes)
-                        val ramUsedFormatted = dpFormatter.format(ramUsedCalculated.amount)
-                        val ramUsedPercent = dpFormatter.format(ramUsedBytes.toDouble() / Runtime.getRuntime().totalMemory() * 100)
+                    val ramUsedBytes = stats.getLong("used_ram")
+                    val ramUsedCalculated = Capacity.calculate(ramUsedBytes)
+                    val ramUsedFormatted = dpFormatter.format(ramUsedCalculated.amount)
+                    val ramUsedPercent = dpFormatter.format(ramUsedBytes.toDouble() / Runtime.getRuntime().totalMemory() * 100)
 
-                        entry {
-                            StringBuilder().append("Node ${node.key}\n")
-                                .append("**Slice**: ${stats.getInt("shard_slice_start")} to ${stats.getInt("shard_slice_end") - 1}\n")
-                                .append("**Uptime**: ${Utils.getTimestamp(stats.getLong("uptime"))}\n")
-                                .append("**RAM Usage:** $ramUsedFormatted${ramUsedCalculated.unit} ($ramUsedPercent%)\n")
-                                .append("**Threads**: ${stats.getLong("thread_count")}\n")
-                                .append("**Guilds**: ${stats.getLong("guild_count")}\n")
-                                .append("**Cached Users**: ${stats.getLong("cached_users")}\n")
-                                .append("**Players**: ${stats.getLong("music_players")}\n")
-                                .toString()
-                        }
+                    entry {
+                        StringBuilder().append("Node ${node.key}\n")
+                            .append("**Slice**: ${stats.getInt("shard_slice_start")} to ${stats.getInt("shard_slice_end") - 1}\n")
+                            .append("**Uptime**: ${Utils.getTimestamp(stats.getLong("uptime"))}\n")
+                            .append("**RAM Usage:** $ramUsedFormatted${ramUsedCalculated.unit} ($ramUsedPercent%)\n")
+                            .append("**Threads**: ${stats.getLong("thread_count")}\n")
+                            .append("**Guilds**: ${stats.getLong("guild_count")}\n")
+                            .append("**Cached Users**: ${stats.getLong("cached_users")}\n")
+                            .append("**Players**: ${stats.getLong("music_players")}\n")
+                            .toString()
                     }
                 }
+            }
 
-                setItemsPerPage(3)
-            }.display(tx)
-        }
+            setItemsPerPage(3)
+        }.display(ctx.messageChannel)
     }
 }
