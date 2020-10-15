@@ -25,6 +25,7 @@
 package gg.octave.bot.utils.extensions
 
 import gg.octave.bot.entities.framework.Usages
+import me.devoxin.flight.internal.arguments.types.Snowflake
 import me.devoxin.flight.internal.entities.Executable
 import net.dv8tion.jda.api.entities.*
 import java.net.URL
@@ -46,6 +47,7 @@ fun Executable.generateDefaultUsage(): String {
                 Boolean::class.java, java.lang.Boolean::class.java -> "yes"
                 Duration::class.java -> "20m"
                 URL::class.java -> "https://www.youtube.com/watch?v=2JBNbhIYR18"
+                Snowflake::class.java -> "201503408652419073"
                 else -> {
                     if (arg.type.isEnum) {
                         arg.type.enumConstants.first().toString().toLowerCase()
