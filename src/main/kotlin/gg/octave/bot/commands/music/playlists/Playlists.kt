@@ -128,7 +128,9 @@ class Playlists : Cog {
             setTitle("Sharing playlist \"${existingPlaylist.name}\"")
             setDescription(
                 "Your unique playlist ID is `${existingPlaylist.id}`.\n" +
-                "Share this with your friends - it will allow them to play your playlist and even clone it!"
+                    "Share this with your friends - it will allow them to play your playlist and even clone it!\n\n" +
+                    "Playing a shared playlist -> `${ctx.trigger}playlists play ${existingPlaylist.id}`\n" +
+                    "Cloning a shared playlist -> `${ctx.trigger}playlists clone ${existingPlaylist.id}`"
             )
             addField(
                 "Changed your mind?",
@@ -178,6 +180,52 @@ class Playlists : Cog {
         Launcher.players.playerManager.loadItem(url.toString(), loader)
     }
 
+    @SubCommand(aliases = ["copy", "yoink", "steal"], description = "Clone a public playlist to your library!")
+    fun clone(ctx: Context, playlistId: String, @Greedy rename: String?) {
+        if (!checkQuota(ctx)) {
+            return
+        }
+
+        val playlist = ctx.db.getCustomPlaylistById(playlistId)
+            ?: return ctx.send("No playlists found with that ID.")
+
+        if (playlist.author == ctx.author.id) {
+            return ctx.send {
+                setColor(0x9571D3)
+                setTitle("Whoops...")
+                setDescription("You can't clone your own playlist.")
+            }
+        }
+
+        if (!playlist.isExposed) {
+            return ctx.send {
+                setColor(0x9571D3)
+                setTitle("Whoops...")
+                setDescription("The playlist you're trying to clone is set to private.")
+                setFooter("🥺 lemme clone your playlist bro")
+            }
+        }
+
+        if (ctx.db.getCustomPlaylist(ctx.author.id, rename ?: playlist.name) != null) {
+            return ctx.send {
+                    setColor(0x9571D3)
+                    setTitle("Whoops...")
+                    setDescription("You already have a playlist with the same name as the one you're cloning.\n" +
+                        "Re-run the command but specify a new name.\nExample: `${ctx.trigger}playlists clone $playlistId My New Playlist Except It's Stolen`")
+            }
+        }
+
+        val clonedPlaylist = CustomPlaylist.createWith(ctx.author.id, rename ?: playlist.name)
+        clonedPlaylist.setTracks(playlist.decodedTracks)
+        clonedPlaylist.save()
+
+        ctx.send {
+            setColor(0x9571D3)
+            setTitle("Playlist Cloned")
+            setDescription("Successfully cloned `${playlist.name}` to your library.")
+        }
+    }
+
     @SubCommand(aliases = ["play"], description = "Loads a custom playlist for playing.")
     fun load(ctx: Context, @Greedy name: String) {
         when {
@@ -197,8 +245,28 @@ class Playlists : Cog {
             }
         }
 
-        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
-            ?: return ctx.send("You don't have any playlists with that name.")
+        var existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
+
+        if (existingPlaylist == null && name.length == 5) {
+            existingPlaylist = ctx.db.getCustomPlaylistById(name)
+        }
+
+        if (existingPlaylist == null) {
+            return ctx.send {
+                setColor(0x9571D3)
+                setTitle("Unknown Playlist")
+                setDescription("There were no playlists found with that name/ID.")
+            }
+        }
+
+        if (!existingPlaylist.isExposed && existingPlaylist.author != ctx.author.id) {
+            return ctx.send {
+                setColor(0x9571D3)
+                setTitle("Whoops...")
+                setDescription("The playlist you're trying to play is set to private.")
+                setFooter("🥺 lemme play your playlist bro")
+            }
+        }
 
         val manager = Launcher.players.get(ctx.guild!!)
         val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, null)
@@ -208,6 +276,9 @@ class Playlists : Cog {
     // fun share(ctx: Context, @Greedy name: String)
     // fun privacy(ctx: Context, setting: ..., @Greedy name: String) // Changes whether a playlist can be viewed by other users.
     // fun snoop(ctx: Context, user: User) // snoop on other user's custom playlists.
+
+    // Perhaps track how many times a playlist has been cloned, and show it in a leaderboard thing.
+    //  - "Top cloned playlists"
 
     // method to remove multiple tracks from playlist
 
