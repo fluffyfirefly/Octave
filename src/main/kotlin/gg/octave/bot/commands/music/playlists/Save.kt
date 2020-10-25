@@ -65,10 +65,10 @@ class Save : Cog {
             ?: return ctx.send("No custom playlists found with that name.")
 
         val handler = FunctionalResultHandler(
-            Consumer { addToPlaylist(ctx, existingPlaylist, it) },
-            Consumer { addToPlaylist(ctx, existingPlaylist, it) },
-            Runnable { ctx.send("Nothing found for the given query. Try again?") },
-            Consumer { ctx.send("Encountered an issue while looking for the resource.\n`${it.friendlierMessage()}`") }
+            { addToPlaylist(ctx, existingPlaylist, it) },
+            { addToPlaylist(ctx, existingPlaylist, it) },
+            { ctx.send("Nothing found for the given query. Try again?") },
+            { ctx.send("Encountered an issue while looking for the resource.\n`${it.friendlierMessage()}`") }
         )
 
         val exQuery = if (directResourcePrefixes.any { it in query }) query.removeSurrounding("<", ">") else "ytsearch:$query"
@@ -94,7 +94,7 @@ class Save : Cog {
 
                 ctx.send {
                     setColor(0x9571D3)
-                    setTitle("Track Added")
+                    setTitle("Tracks Added")
                     setDescription("Added `${item.tracks.size}` tracks from **${item.name}** to **${playlist.name}**")
                 }
             }
