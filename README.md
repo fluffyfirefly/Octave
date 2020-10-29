@@ -13,4 +13,3 @@ Octave provides a premium music experience.
 - Though we do not disallow user-hosted versions of Octave, we will not provide **any** support for it.
 - We are not responsible for anything that this project does to you or your server and can not be held liable 
     for anything pertaining to it. 
-
