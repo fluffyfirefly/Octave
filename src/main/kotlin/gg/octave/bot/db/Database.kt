@@ -131,6 +131,9 @@ class Database(private val name: String) {
             .firstOrNull { it.name == fuzzyTitle || it.name.toLowerCase().contains(loweredTitle) }
     }
 
+    fun getGlobalRatelimit(): Long = jedisPool.resource.use { it.get("octave:globalRatelimit")?.toLong() } ?: 0
+    fun setGlobalRatelimit(ratelimit: Long): Unit = jedisPool.resource.use { it.set("octave:globalRatelimit", ratelimit.toString()) }
+
     fun close() = conn.close()
 
     operator fun <T> get(table: String, id: String, cls: Class<T>): T? = if (isOpen) r.table(table)[id].run(conn, cls) else null

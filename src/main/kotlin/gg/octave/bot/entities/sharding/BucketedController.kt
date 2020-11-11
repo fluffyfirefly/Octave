@@ -25,6 +25,7 @@
 //Original class in Mantaro made by natanbc
 package gg.octave.bot.entities.sharding
 
+import gg.octave.bot.Launcher
 import net.dv8tion.jda.api.utils.SessionController
 import net.dv8tion.jda.api.utils.SessionController.SessionConnectNode
 import net.dv8tion.jda.api.utils.SessionControllerAdapter
@@ -35,7 +36,19 @@ import javax.annotation.Nonnull
 class BucketedController(@Nonnegative bucketFactor: Int, homeGuildId: Long) : SessionControllerAdapter() {
     private val shardControllers: Array<SessionController?>
 
-    constructor(homeGuildId: Long) : this(16, homeGuildId)
+    init {
+        require(bucketFactor >= 1) { "Bucket factor must be at least 1" }
+        shardControllers = arrayOfNulls(bucketFactor)
+        for (i in 0 until bucketFactor) {
+            shardControllers[i] = PrioritizingSessionController(homeGuildId)
+        }
+    }
+
+    @Nonnull
+    @CheckReturnValue
+    private fun controllerFor(@Nonnull node: SessionConnectNode): SessionController? {
+        return shardControllers[node.shardInfo.shardId % shardControllers.size]
+    }
 
     override fun appendSession(@Nonnull node: SessionConnectNode) {
         controllerFor(node)!!.appendSession(node)
@@ -45,17 +58,7 @@ class BucketedController(@Nonnegative bucketFactor: Int, homeGuildId: Long) : Se
         controllerFor(node)!!.removeSession(node)
     }
 
-    @Nonnull
-    @CheckReturnValue
-    private fun controllerFor(@Nonnull node: SessionConnectNode): SessionController? {
-        return shardControllers[node.shardInfo.shardId % shardControllers.size]
-    }
+//    override fun getGlobalRatelimit(): Long = Launcher.database.getGlobalRatelimit()
+//    override fun setGlobalRatelimit(ratelimit: Long) = Launcher.database.setGlobalRatelimit(ratelimit)
 
-    init {
-        require(bucketFactor >= 1) { "Bucket factor must be at least 1" }
-        shardControllers = arrayOfNulls(bucketFactor)
-        for (i in 0 until bucketFactor) {
-            shardControllers[i] = PrioritizingSessionController(homeGuildId)
-        }
-    }
 }

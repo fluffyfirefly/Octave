@@ -95,6 +95,7 @@ object Launcher {
         Sentry.init(configuration.sentryDsn)
         Sentry.getStoredClient().release = OctaveBot.GIT_REVISION
         RestAction.setPassContext(false)
+        RestAction.setDefaultTimeout(7, TimeUnit.SECONDS)
 
         commandExecutor = Executors.newCachedThreadPool(
             ThreadFactoryBuilder().setNameFormat("Octave-FlightExecutor-%d").get()
