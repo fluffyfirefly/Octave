@@ -54,6 +54,7 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 object Launcher {
     val configuration = Configuration(File("bot.conf"))
@@ -81,6 +82,8 @@ object Launcher {
     lateinit var commandExecutor: ExecutorService
         private set
 
+    private val RESTACTION_DEFAULT_FAILURE = RestAction.getDefaultFailure()
+
     @ExperimentalStdlibApi
     @JvmStatic
     fun main(args: Array<String>) {
@@ -94,8 +97,14 @@ object Launcher {
 
         Sentry.init(configuration.sentryDsn)
         Sentry.getStoredClient().release = OctaveBot.GIT_REVISION
+
         RestAction.setPassContext(false)
         RestAction.setDefaultTimeout(7, TimeUnit.SECONDS)
+        RestAction.setDefaultFailure {
+            if (it !is TimeoutException) {
+                RESTACTION_DEFAULT_FAILURE.accept(it)
+            }
+        }
 
         commandExecutor = Executors.newCachedThreadPool(
             ThreadFactoryBuilder().setNameFormat("Octave-FlightExecutor-%d").get()
