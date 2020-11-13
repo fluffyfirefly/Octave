@@ -32,8 +32,8 @@ class Playlists : Cog {
         val octavePlaylists = allPlaylists.filter { !it.isImported }
         val memerPlaylists = allPlaylists.filter { it.isImported }
 
-        val octavePage = Page.paginate(octavePlaylists, page, "") { i, p -> "`${i + 1}.` ${p.name}\n" }
-        val memerPage = Page.paginate(memerPlaylists, page, "") { i, p -> "`${i + 1}.` ${p.name}\n" }
+        val octavePage = Page.paginate(octavePlaylists, page, "", ::formatPlaylist)
+        val memerPage = Page.paginate(memerPlaylists, page, "", ::formatPlaylist)
 
         val showing = octavePage.elementCount + memerPage.elementCount
         val total = octavePlaylists.size + memerPlaylists.size
@@ -295,5 +295,22 @@ class Playlists : Cog {
         }
 
         return true
+    }
+
+    private fun formatPlaylist(index: Int, playlist: CustomPlaylist): String {
+        return buildString {
+            append("`")
+            append(index + 1)
+            append(".` ")
+            append(playlist.name)
+
+            if (playlist.isExposed) {
+                append(" - `")
+                append(playlist.id)
+                append("`")
+            }
+
+            append("\n")
+        }
     }
 }
