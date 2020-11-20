@@ -55,6 +55,7 @@ class DiscordFM {
                 try {
                     val collect = IOUtils.toString(it, Charsets.UTF_8)
                         .split('\n')
+                        .map { s -> s.split(' ')[0] }
                         .filter { s -> s.startsWith("https://") }
 
                     cache[lib] = collect
