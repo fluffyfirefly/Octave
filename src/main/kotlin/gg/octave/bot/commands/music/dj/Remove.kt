@@ -42,7 +42,7 @@ import java.util.regex.Pattern
 class Remove : MusicCog {
     override fun sameChannel() = true
 
-    private val pattern = Pattern.compile("(\\d+)?\\s*?\\.\\.\\s*(\\d+)?")
+    private val pattern = Pattern.compile("(\\d+)?\\s*?(?:\\.\\.|-)\\s*(\\d+)?")
 
     @DJ
     @Usages("first", "last", "all", "1..5", "1", "1 7 12 3")
