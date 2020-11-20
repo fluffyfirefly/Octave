@@ -116,6 +116,9 @@ class Database(private val name: String) {
     }
 
     fun getCustomPlaylistById(id: String) = get("customplaylists", id, CustomPlaylist::class.java)
+    fun getCustomPlaylistByNameOrId(authorId: String, query: String) = query<Cursor<CustomPlaylist>, CustomPlaylist>(CustomPlaylist::class.java) {
+        table("customplaylists").filter { it.g("author").eq(authorId).and(it.g("name").eq(query).or(it.g("id").eq(query))) }
+    }?.toList()?.firstOrNull()
     fun getCustomPlaylist(authorId: String, title: String) = query<Cursor<CustomPlaylist>, CustomPlaylist>(CustomPlaylist::class.java) {
         table("customplaylists").filter { it.g("author").eq(authorId).and(it.g("name").eq(title)) }
     }?.toList()?.firstOrNull()
@@ -128,7 +131,7 @@ class Database(private val name: String) {
     fun findCustomPlaylist(authorId: String, fuzzyTitle: String): CustomPlaylist? {
         val loweredTitle = fuzzyTitle.toLowerCase()
         return getCustomPlaylistsAsList(authorId)
-            .firstOrNull { it.name == fuzzyTitle || it.name.toLowerCase().contains(loweredTitle) }
+            .firstOrNull { it.id == name || it.name == fuzzyTitle || it.name.toLowerCase().contains(loweredTitle) }
     }
 
     fun getGlobalRatelimit(): Long = jedisPool.resource.use { it.get("octave:globalRatelimit")?.toLong() } ?: 0

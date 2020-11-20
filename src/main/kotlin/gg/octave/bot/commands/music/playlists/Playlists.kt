@@ -75,7 +75,7 @@ class Playlists : Cog {
 
     @SubCommand(aliases = ["del", "remove", "-"], description = "Delete one of your custom playlists.")
     fun delete(ctx: Context, @Greedy name: String) {
-        val existingPlaylist = ctx.db.getCustomPlaylist(ctx.author.id, name)
+        val existingPlaylist = ctx.db.getCustomPlaylistByNameOrId(ctx.author.id, name)
             ?: return ctx.send {
                 setColor(0x9571D3)
                 setTitle("Your Playlists")
@@ -303,11 +303,12 @@ class Playlists : Cog {
             append(index + 1)
             append(".` ")
             append(playlist.name)
+            append(" - `")
+            append(playlist.id)
+            append("`")
 
             if (playlist.isExposed) {
-                append(" - `")
-                append(playlist.id)
-                append("`")
+                append(" \\🔓 ")
             }
 
             append("\n")
