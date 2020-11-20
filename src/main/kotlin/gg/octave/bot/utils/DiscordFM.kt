@@ -37,10 +37,11 @@ class DiscordFM {
     companion object {
         private val log = LoggerFactory.getLogger(DiscordFM::class.java)
         val LIBRARIES = arrayOf(
-            "electro hub", "chill corner", "korean madness",
-            "japanese lounge", "classical", "retro renegade",
-            "metal mix", "hip hop", "electro swing", "christmas", "halloween",
-            "purely pop", "rock n roll", "coffee house jazz", "funk")
+            "chill corner", "christmas", "classical", "coffee house jazz",
+            "country countdown", "electro hub", "electro swing", "funk",
+            "halloween", "hip hop", "japanese lounge", "korean madness",
+            "metal mix", "purely pop", "retro renegade", "rock n roll"
+        )
         private val cache = HashMap<String, List<String>>(LIBRARIES.size)
     }
 
