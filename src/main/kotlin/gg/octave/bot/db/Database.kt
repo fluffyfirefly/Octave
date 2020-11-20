@@ -131,7 +131,7 @@ class Database(private val name: String) {
     fun findCustomPlaylist(authorId: String, fuzzyTitle: String): CustomPlaylist? {
         val loweredTitle = fuzzyTitle.toLowerCase()
         return getCustomPlaylistsAsList(authorId)
-            .firstOrNull { it.id == name || it.name == fuzzyTitle || it.name.toLowerCase().contains(loweredTitle) }
+            .firstOrNull { it.id == fuzzyTitle || it.name == fuzzyTitle || it.name.toLowerCase().contains(loweredTitle) }
     }
 
     fun getGlobalRatelimit(): Long = jedisPool.resource.use { it.get("octave:globalRatelimit")?.toLong() } ?: 0
