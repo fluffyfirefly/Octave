@@ -106,3 +106,11 @@ private fun getUnits(s: String): String {
     }
     return s.substring(i + 1)
 }
+
+fun <T> List<T>.truncate(maxItems: Int, mapper: (T) -> String): List<String> {
+    if (this.size > maxItems) {
+        return this.take(maxItems).map(mapper).plus("... and ${this.size - maxItems} more items.")
+    }
+
+    return this.map(mapper)
+}
