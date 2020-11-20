@@ -106,11 +106,10 @@ class Remove : MusicCog {
                 ?: return ctx.send("Invalid end of range")
         }
 
-        for (i in end downTo start) {
-            queue.removeAt(i - 1)
-        }
+        val range = (end downTo start).map { it - 1 }
+        queue.removeAll(range)
 
-        return ctx.send("Removed tracks `$start-$end` from the queue.")
+        return ctx.send("Removed tracks `${range.size}` from the queue.")
     }
 
     fun removeMany(ctx: Context, ind: List<String>) {
