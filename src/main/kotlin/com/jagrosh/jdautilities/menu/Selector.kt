@@ -137,18 +137,14 @@ class Selector(
             Type.MESSAGE -> {
                 waiter.waitFor(GuildMessageReceivedEvent::class.java) {
                     val content = it.message.contentDisplay
+
                     if (content == "cancel") {
-                        finally(message)
-                        return@waitFor
+                        return@waitFor finally(message)
                     }
 
                     val value = content.toIntOrNull() ?: return@waitFor
-                    it.channel.retrieveMessageById(it.messageIdLong).queue({
-                        options[value - 1].action(it)
-                        finally(message)
-                    }, {
-                        finally(message)
-                    })
+                    options[value - 1].action(it.message)
+                    finally(message)
                 }.predicate {
                     when {
                         it.author.isBot -> false
