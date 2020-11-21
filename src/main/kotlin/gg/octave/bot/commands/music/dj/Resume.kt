@@ -30,15 +30,15 @@ import gg.octave.bot.utils.extensions.manager
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 
-class Pause : MusicCog {
+class Resume : MusicCog {
     override fun sameChannel() = true
     override fun requirePlayingTrack() = true
     override fun requirePlayer() = true
 
     @DJ
-    @Command(description = "Pause the music player.")
-    fun pause(ctx: Context) {
-        ctx.manager.player.isPaused = true
-        ctx.message.addReaction("⏸").queue()
+    @Command(description = "Resume the music player.")
+    fun resume(ctx: Context) {
+        ctx.manager.player.isPaused = false
+        ctx.message.addReaction("▶").queue()
     }
 }
