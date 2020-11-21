@@ -37,14 +37,17 @@ class LoadResultHandler(
             return
         }
 
+        val isImmediatePlay = musicManager.player.playingTrack == null && musicManager.queue.isEmpty()
         track.userData = trackContext
         musicManager.enqueue(track, isNext)
 
-        ctx.send {
-            setColor(0x9570D3)
-            setTitle("Music Queue")
-            setDescription("Added __**[${track.info.embedTitle}](${track.info.embedUri})**__ to queue.")
-            setFooter(footnote)
+        if (!isImmediatePlay) {
+            ctx.send {
+                setColor(0x9570D3)
+                setTitle("Music Queue")
+                setDescription("Added __**[${track.info.embedTitle}](${track.info.embedUri})**__ to queue.")
+                setFooter(footnote)
+            }
         }
     }
 

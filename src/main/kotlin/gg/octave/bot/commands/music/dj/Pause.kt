@@ -39,18 +39,12 @@ class Pause : MusicCog {
     @Command(description = "Pause or resume the music player.")
     fun pause(ctx: Context) {
         val manager = ctx.manager
-
         manager.player.isPaused = !manager.player.isPaused
 
-        val message = when (manager.player.isPaused) {
-            true -> "Paused the current player."
-            false -> "Resumed the current player."
-        }
-
-        ctx.send {
-            setColor(0x9570D3)
-            setTitle("Pause")
-            setDescription(message)
+        if (manager.player.isPaused) {
+            ctx.message.addReaction("⏸").queue()
+        } else {
+            ctx.message.addReaction("▶").queue()
         }
     }
 }

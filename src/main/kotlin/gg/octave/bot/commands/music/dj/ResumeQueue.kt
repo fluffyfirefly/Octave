@@ -32,7 +32,7 @@ import gg.octave.bot.utils.extensions.voiceChannel
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 
-class Resume : MusicCog {
+class ResumeQueue : MusicCog {
     override fun requireVoiceState() = true
 
     @DJ
