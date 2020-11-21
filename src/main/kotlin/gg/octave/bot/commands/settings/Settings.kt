@@ -24,6 +24,7 @@
 
 package gg.octave.bot.commands.settings
 
+import gg.octave.bot.Launcher
 import gg.octave.bot.db.guilds.GuildData
 import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.utils.extensions.*
@@ -77,7 +78,7 @@ class Settings : Cog {
             setColor(0x9570D3)
             setTitle("Settings Overview")
             addField("Command", buildString {
-                appendln("Prefix: `${cmd.prefix}`")
+                appendln("Prefix: `${cmd.prefix ?: Launcher.configuration.prefix}`")
                 appendln("Response Cleanup: `$respClean`")
                 appendln("Delete Invocation: `${cmd.isInvokeDelete.toHuman()}`")
             }, true)
