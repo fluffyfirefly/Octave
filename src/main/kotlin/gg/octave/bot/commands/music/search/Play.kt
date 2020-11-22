@@ -41,6 +41,7 @@ import me.devoxin.flight.api.annotations.Command
 import me.devoxin.flight.api.annotations.Greedy
 import me.devoxin.flight.api.entities.Cog
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
@@ -109,28 +110,41 @@ class Play : Cog {
         val oldQueue = MusicManagerV2.getQueueFor(ctx.guild!!.id)
 
         if (!hasManager && !oldQueue.isEmpty()) {
-            SelectorBuilder(Launcher.eventWaiter)
-                .setType(Selector.Type.MESSAGE)
-                .setUser(ctx.author)
-                .setTitle("Would you like to keep your old queue?")
-                .setDescription("Thanks for using Octave!")
-                .addOption("Yes, keep it.") {
-                    ctx.send("Kept old queue. Playing new song first and continuing with your queue...")
-                    future.complete(true)
-                }
-                .addOption("No, start a new queue.") {
-                    oldQueue.clear()
-                    ctx.send("Scrapped old queue. A new queue will start.")
-                    future.complete(true)
-                }
-                .finally {
-                    if (!future.isDone) { // Timeout or cancel.
-                        future.complete(false)
-                        it?.delete()?.queue()
+            ctx.messageChannel.sendMessage(
+                EmbedBuilder().apply {
+                    setColor(0x9570D3)
+                    setTitle("Would you like to keep your old queue?")
+                    setDescription("Thanks for using Octave!\n\n1️⃣ Yes, keep it.\n2️⃣ No, start a new queue.")
+                    addField("Select an Option", "Type a number corresponding to the options. E.g. `1` or `cancel`", false)
+                    setFooter("This selection will time out in 20 seconds.")
+                }.build()
+            ).queue { menu ->
+                val waiter = ctx.commandClient.waitFor(MessageReceivedEvent::class.java, {
+                    it.author.idLong == ctx.author.idLong && it.channel.idLong == ctx.messageChannel.idLong
+                        && (it.message.contentRaw == "1" || it.message.contentRaw == "2" || it.message.contentRaw.toLowerCase() == "cancel")
+                }, 20000)
+
+                waiter.whenComplete { r, timeout ->
+                    when {
+                        timeout != null || r.message.contentRaw == "cancel" -> {
+                            if (!future.isDone) { // Timeout or cancel.
+                                future.complete(false)
+                                menu.delete().queue()
+                            }
+                        }
+                        r.message.contentRaw[0].isDigit() -> {
+                            when (r.message.contentRaw.toInt()) {
+                                1 -> ctx.send("Kept old queue. Playing new song first and continuing with your queue...")
+                                2 -> {
+                                    oldQueue.clear()
+                                    ctx.send("Scrapped old queue. A new queue will start.")
+                                }
+                            }
+                            future.complete(true)
+                        }
                     }
                 }
-                .build()
-                .display(ctx.textChannel!!)
+            }
         } else {
             future.complete(true)
         }
@@ -202,6 +216,7 @@ class Play : Cog {
 
             ctx.messageChannel.sendMessage(
                 EmbedBuilder().apply {
+                    setColor(0x9570D3)
                     setTitle("Vote Play")
                     setDescription(
                         "${ctx.author.asMention} has voted to **play** a track! React with 👍\n" +

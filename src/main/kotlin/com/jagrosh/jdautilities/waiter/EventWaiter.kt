@@ -46,8 +46,8 @@ class EventWaiter : EventListener {
                                         unit: TimeUnit?,
                                         timeoutAction: (() -> Unit)?): Waiter<T> {
         val list = waiters.getOrPut(cls, ::mutableListOf)
-
         val waiter = Waiter(cls, predicate, action)
+
         list.add(waiter as Waiter<GenericEvent>)
 
         if (timeout > 0) {
