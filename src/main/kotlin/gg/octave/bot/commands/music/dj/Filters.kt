@@ -24,7 +24,10 @@
 
 package gg.octave.bot.commands.music.dj
 
-import gg.octave.bot.entities.framework.*
+import gg.octave.bot.entities.framework.DJ
+import gg.octave.bot.entities.framework.DonorOnly
+import gg.octave.bot.entities.framework.MusicCog
+import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.music.MusicManagerV2
 import gg.octave.bot.utils.extensions.DEFAULT_SUBCOMMAND
 import gg.octave.bot.utils.extensions.manager

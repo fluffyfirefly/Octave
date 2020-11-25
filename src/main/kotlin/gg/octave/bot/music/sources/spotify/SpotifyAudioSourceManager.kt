@@ -53,6 +53,7 @@ class SpotifyAudioSourceManager(
 ) : AudioSourceManager {
     private val httpInterfaceManager = HttpClientTools.createDefaultThreadLocalManager()!!
     private val trackLoaderPool = Executors.newFixedThreadPool(10)
+
     @Suppress("MemberVisibilityCanBePrivate")
     val accessTokenTracker = SpotifyAccessTokenTracker(clientId, clientSecret, this)
 

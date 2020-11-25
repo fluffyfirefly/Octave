@@ -15,7 +15,6 @@ import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 import me.devoxin.flight.api.annotations.Greedy
 import me.devoxin.flight.api.entities.Cog
-import java.util.function.Consumer
 
 class Save : Cog {
     @Command(aliases = ["+"], description = "Saves the current track to a custom playlist.")

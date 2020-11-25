@@ -119,6 +119,7 @@ class Database(private val name: String) {
     fun getCustomPlaylistByNameOrId(authorId: String, query: String) = query<Cursor<CustomPlaylist>, CustomPlaylist>(CustomPlaylist::class.java) {
         table("customplaylists").filter { it.g("author").eq(authorId).and(it.g("name").eq(query).or(it.g("id").eq(query))) }
     }?.toList()?.firstOrNull()
+
     fun getCustomPlaylist(authorId: String, title: String) = query<Cursor<CustomPlaylist>, CustomPlaylist>(CustomPlaylist::class.java) {
         table("customplaylists").filter { it.g("author").eq(authorId).and(it.g("name").eq(title)) }
     }?.toList()?.firstOrNull()

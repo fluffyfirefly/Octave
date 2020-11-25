@@ -23,6 +23,7 @@ public class Insights extends ManagedObject {
 
     /**
      * Resets all values to 0.
+     *
      * @return The insights class, useful for chaining.
      */
     public Insights reset() {

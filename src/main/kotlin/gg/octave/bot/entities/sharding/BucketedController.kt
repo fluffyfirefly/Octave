@@ -25,7 +25,6 @@
 //Original class in Mantaro made by natanbc
 package gg.octave.bot.entities.sharding
 
-import gg.octave.bot.Launcher
 import net.dv8tion.jda.api.utils.SessionController
 import net.dv8tion.jda.api.utils.SessionController.SessionConnectNode
 import net.dv8tion.jda.api.utils.SessionControllerAdapter

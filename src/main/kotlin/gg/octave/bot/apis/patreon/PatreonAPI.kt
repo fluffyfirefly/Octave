@@ -26,7 +26,6 @@ package gg.octave.bot.apis.patreon
 
 import gg.octave.bot.Launcher
 import gg.octave.bot.utils.RequestUtil
-import gg.octave.bot.utils.Scheduler
 import io.sentry.Sentry
 import okhttp3.HttpUrl
 import okhttp3.Request
@@ -36,7 +35,6 @@ import java.net.URI
 import java.net.URLDecoder
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class PatreonAPI(var accessToken: String?) {
     private val executor = Executors.newSingleThreadScheduledExecutor()

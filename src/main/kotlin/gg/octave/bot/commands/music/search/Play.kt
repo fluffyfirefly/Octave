@@ -24,8 +24,6 @@
 
 package gg.octave.bot.commands.music.search
 
-import com.jagrosh.jdautilities.menu.Selector
-import com.jagrosh.jdautilities.menu.SelectorBuilder
 import gg.octave.bot.Launcher
 import gg.octave.bot.listeners.FlightEventAdapter
 import gg.octave.bot.music.LoadResultHandler

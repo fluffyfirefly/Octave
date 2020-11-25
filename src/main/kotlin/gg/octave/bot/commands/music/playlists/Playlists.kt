@@ -208,10 +208,10 @@ class Playlists : Cog {
 
         if (ctx.db.getCustomPlaylist(ctx.author.id, rename ?: playlist.name) != null) {
             return ctx.send {
-                    setColor(0x9571D3)
-                    setTitle("Whoops...")
-                    setDescription("You already have a playlist with the same name as the one you're cloning.\n" +
-                        "Re-run the command but specify a new name.\nExample: `${ctx.trigger}playlists clone $playlistId My New Playlist Except It's Stolen`")
+                setColor(0x9571D3)
+                setTitle("Whoops...")
+                setDescription("You already have a playlist with the same name as the one you're cloning.\n" +
+                    "Re-run the command but specify a new name.\nExample: `${ctx.trigger}playlists clone $playlistId My New Playlist Except It's Stolen`")
             }
         }
 
