@@ -66,7 +66,7 @@ class Lyrics : Cog {
             }
 
             val lyrics = URLDecoder.decode(it.getString("content"), Charsets.UTF_8)
-                .replace("\n\n\n+".toRegex(), "\n\n")
+                .replace("\n{2,}".toRegex(), "\n\n")
                 .replace("&amp;", "&")
                 .replace("([(\\[])([^\\n]*?)\\n+([^\\n)\\]]+)\\n+([)\\]])".toRegex(), "$1$2$3$4")
             val pages = TextSplitter.split(lyrics, 1000)
