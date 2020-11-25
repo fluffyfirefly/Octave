@@ -34,6 +34,7 @@ import me.devoxin.flight.api.annotations.SubCommand
 import me.devoxin.flight.api.entities.Cog
 import me.devoxin.flight.internal.utils.TextSplitter
 import org.json.JSONException
+import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
@@ -58,13 +59,16 @@ class Lyrics : Cog {
 
         RequestUtil.jsonObject {
             url("https://lyrics.tsu.sh/v1/?q=$encodedTitle")
-            header("User-Agent", "Octave (DiscordBot, https://github.com/DankMemer/Octave)")
+            header("User-Agent", "Octave (DiscordBot, https://github.com/Stardust-Discord/Octave)")
         }.thenAccept {
             if (!it.isNull("error")) {
                 return@thenAccept ctx.send("No lyrics found for `${ctx.cleanContent(title)}`. Try another song?")
             }
 
-            val lyrics = it.getString("content")
+            val lyrics = URLDecoder.decode(it.getString("content"), Charsets.UTF_8)
+                .replace("\n\n\n+".toRegex(), "\n\n")
+                .replace("&amp;", "&")
+                .replace("([(\\[])([^\\n]*?)\\n+([^\\n)\\]]+)\\n+([)\\]])".toRegex(), "$1$2$3$4")
             val pages = TextSplitter.split(lyrics, 1000)
 
             val songObject = it.getJSONObject("song")
