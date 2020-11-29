@@ -75,6 +75,8 @@ class DSPFilter(private val player: AudioPlayer) {
         set(value) = applyFilters { field = value }
     var vFrequency = 2f
         set(value) = applyFilters { field = value }
+    var vStrength = 1
+        set(value) = applyFilters { field = value }
 
     private fun buildFilters(configs: List<FilterConfig<*>>, format: AudioDataFormat,
                      output: UniversalPcmAudioFilter): List<AudioFilter> {
@@ -129,10 +131,12 @@ class DSPFilter(private val player: AudioPlayer) {
             }
 
             if (vibratoEnable) {
-                filterConfigs.add(VibratoFilter().configure {
-                    depth = vDepth
-                    frequency = vFrequency
-                })
+                for (i in 0 until vStrength) {
+                    filterConfigs.add(VibratoFilter().configure {
+                        depth = vDepth
+                        frequency = vFrequency
+                    })
+                }
             }
 
             if (bassBoost != BoostSetting.OFF) {

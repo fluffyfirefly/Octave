@@ -126,6 +126,11 @@ class Filters : MusicCog {
                 manager.dspFilter.vFrequency = frequency.toFloat()
                 ctx.send("Vibrato `frequency` set to `$frequency`")
             }
+            "strength" -> {
+                val strength = amount.toInt().coerceIn(1, 3)
+                manager.dspFilter.vStrength = strength
+                ctx.send("Vibrato `strength` set to $strength")
+            }
             else -> ctx.send("Invalid choice `$type`, pick one of `depth`/`frequency`.")
         }
     }
