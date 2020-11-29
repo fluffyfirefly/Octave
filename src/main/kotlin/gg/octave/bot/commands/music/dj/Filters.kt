@@ -50,7 +50,7 @@ class Filters : MusicCog {
     fun tremolo(ctx: Context, type: String, value: Double) = modifyTremolo(ctx, type, value, ctx.manager)
 
     @Usages("depth 0.5")
-    @SubCommand(description = "Placeholder.")
+    @SubCommand(description = "Wavy effect.")
     fun vibrato(ctx: Context, type: String, value: Double) = modifyVibrato(ctx, type, value, ctx.manager)
 
     @Usages("speed 1.5")
@@ -122,7 +122,7 @@ class Filters : MusicCog {
                 ctx.send("Vibrato `depth` set to `$depth`")
             }
             "frequency" -> {
-                val frequency = amount.coerceAtLeast(0.1)
+                val frequency = amount.coerceIn(0.1, 14.0)
                 manager.dspFilter.vFrequency = frequency.toFloat()
                 ctx.send("Vibrato `frequency` set to `$frequency`")
             }
