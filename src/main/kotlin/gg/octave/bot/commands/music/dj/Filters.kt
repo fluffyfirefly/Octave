@@ -45,19 +45,19 @@ class Filters : MusicCog {
     @Command(aliases = ["filters", "fx", "effects"], description = "Apply audio filters to the music such as speed and pitch")
     fun filter(ctx: Context) = DEFAULT_SUBCOMMAND(ctx)
 
-    @Usages("depth 0.5")
-    @SubCommand(description = "Wobble effect.")
+    @Usages("depth 0.5", "frequency 6")
+    @SubCommand(description = "Wavy effect.")
     fun tremolo(ctx: Context, type: String, value: Double) = modifyTremolo(ctx, type, value, ctx.manager)
 
-    @Usages("depth 0.5")
-    @SubCommand(description = "Wavy effect.")
+    @Usages("depth 0.5", "frequency 7", "strength 2")
+    @SubCommand(description = "Wobble effect.")
     fun vibrato(ctx: Context, type: String, value: Double) = modifyVibrato(ctx, type, value, ctx.manager)
 
-    @Usages("speed 1.5")
+    @Usages("speed 1.5", "pitch 0.7", "rate 1.25")
     @SubCommand(description = "Pitch, rate, and speed.")
     fun timescale(ctx: Context, type: String, value: Double) = modifyTimescale(ctx, type, value, ctx.manager)
 
-    @Usages("width 100")
+    @Usages("width 100", "level 1", "band 200")
     @SubCommand(description = "Karaoke settings for better vocal filtering.")
     fun karaoke(ctx: Context, type: String?, value: Float?) = modifyKaraoke(ctx, type, value, ctx.manager)
 
