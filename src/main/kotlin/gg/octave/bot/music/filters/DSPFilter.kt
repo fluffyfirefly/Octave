@@ -34,67 +34,49 @@ import gg.octave.bot.music.settings.BoostSetting
 class DSPFilter(private val player: AudioPlayer) {
     // Equalizer properties
     var bassBoost = BoostSetting.OFF
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
 
     // Karaoke properties
     val karaokeEnable: Boolean
         get() = kLevel > 0.0f
 
     var kLevel = 0.0f
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
     var kFilterBand = 220f
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
     var kFilterWidth = 100f
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
 
     // Timescale properties
     val timescaleEnable: Boolean
         get() = tsSpeed != 1.0 || tsPitch != 1.0 || tsRate != 1.0
 
     var tsSpeed = 1.0
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
     var tsPitch = 1.0
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
     var tsRate = 1.0
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
 
     // Tremolo properties
     val tremoloEnable: Boolean
         get() = tDepth > 0.0f
 
     var tDepth = 0.0f
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
     var tFrequency = 2f
-        set(value) {
-            field = value
-            applyFilters()
-        }
+        set(value) = applyFilters { field = value }
 
-    fun buildFilters(configs: List<FilterConfig<*>>, format: AudioDataFormat,
+    // Vibrato properties
+    val vibratoEnable: Boolean
+        get() = vDepth > 0.0f
+
+    var vDepth = 0.0f
+        set(value) = applyFilters { field = value }
+    var vFrequency = 2f
+        set(value) = applyFilters { field = value }
+
+    private fun buildFilters(configs: List<FilterConfig<*>>, format: AudioDataFormat,
                      output: UniversalPcmAudioFilter): List<AudioFilter> {
         if (configs.isEmpty()) {
             return emptyList()
@@ -114,42 +96,50 @@ class DSPFilter(private val player: AudioPlayer) {
         return filters.reversed()
     }
 
+    fun applyFilters(preOperation: () -> Unit) {
+        preOperation()
+        applyFilters()
+    }
+
     fun applyFilters() {
         player.setFilterFactory { _, format, output ->
             val filterConfigs = mutableListOf<FilterConfig<*>>()
 
             if (karaokeEnable) {
-                val config = KaraokeFilter().configure {
+                filterConfigs.add(KaraokeFilter().configure {
                     level = kLevel
                     filterBand = kFilterBand
                     filterWidth = kFilterWidth
-                }
-                filterConfigs.add(config)
+                })
             }
 
             if (timescaleEnable) {
-                val config = TimescaleFilter().configure {
+                filterConfigs.add(TimescaleFilter().configure {
                     pitch = tsPitch
                     speed = tsSpeed
                     rate = tsRate
-                }
-                filterConfigs.add(config)
+                })
             }
 
             if (tremoloEnable) {
-                val config = TremoloFilter().configure {
+                filterConfigs.add(TremoloFilter().configure {
                     depth = tDepth
                     frequency = tFrequency
-                }
-                filterConfigs.add(config)
+                })
+            }
+
+            if (vibratoEnable) {
+                filterConfigs.add(VibratoFilter().configure {
+                    depth = vDepth
+                    frequency = vFrequency
+                })
             }
 
             if (bassBoost != BoostSetting.OFF) {
-                val config = EqualizerFilter().configure {
+                filterConfigs.add(EqualizerFilter().configure {
                     setGain(0, bassBoost.band1)
                     setGain(1, bassBoost.band2)
-                }
-                filterConfigs.add(config)
+                })
             }
 
             return@setFilterFactory buildFilters(filterConfigs, format, output)
@@ -162,6 +152,7 @@ class DSPFilter(private val player: AudioPlayer) {
         bassBoost = BoostSetting.OFF
         kLevel = 0.0f
         tDepth = 0.0f
+        vDepth = 0.0f
 
         tsPitch = 1.0
         tsRate = 1.0

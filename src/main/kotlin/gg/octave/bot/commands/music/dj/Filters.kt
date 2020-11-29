@@ -49,6 +49,10 @@ class Filters : MusicCog {
     @SubCommand(description = "Wobble effect.")
     fun tremolo(ctx: Context, type: String, value: Double) = modifyTremolo(ctx, type, value, ctx.manager)
 
+    @Usages("depth 0.5")
+    @SubCommand(description = "Placeholder.")
+    fun vibrato(ctx: Context, type: String, value: Double) = modifyVibrato(ctx, type, value, ctx.manager)
+
     @Usages("speed 1.5")
     @SubCommand(description = "Pitch, rate, and speed.")
     fun timescale(ctx: Context, type: String, value: Double) = modifyTimescale(ctx, type, value, ctx.manager)
@@ -63,6 +67,7 @@ class Filters : MusicCog {
         val karaokeStatus = if (manager.dspFilter.karaokeEnable) "Enabled" else "Disabled"
         val tremoloStatus = if (manager.dspFilter.tremoloEnable) "Enabled" else "Disabled"
         val timescaleStatus = if (manager.dspFilter.timescaleEnable) "Enabled" else "Disabled"
+        val vibratoStatus = if (manager.dspFilter.vibratoEnable) "Enabled" else "Disabled"
 
         ctx.send {
             setColor(0x9570D3)
@@ -70,6 +75,7 @@ class Filters : MusicCog {
             addField("Karaoke", karaokeStatus, true)
             addField("Timescale", timescaleStatus, true)
             addField("Tremolo", tremoloStatus, true)
+            addField("Vibrato", vibratoStatus, true)
         }
     }
 
@@ -99,11 +105,26 @@ class Filters : MusicCog {
                 manager.dspFilter.tDepth = depth.toFloat()
                 ctx.send("Tremolo `depth` set to `$depth`")
             }
-
             "frequency" -> {
                 val frequency = amount.coerceAtLeast(0.1)
                 manager.dspFilter.tFrequency = frequency.toFloat()
                 ctx.send("Tremolo `frequency` set to `$frequency`")
+            }
+            else -> ctx.send("Invalid choice `$type`, pick one of `depth`/`frequency`.")
+        }
+    }
+
+    private fun modifyVibrato(ctx: Context, type: String, amount: Double, manager: MusicManagerV2) {
+        when (type) {
+            "depth" -> {
+                val depth = amount.coerceIn(0.0, 1.0)
+                manager.dspFilter.vDepth = depth.toFloat()
+                ctx.send("Vibrato `depth` set to `$depth`")
+            }
+            "frequency" -> {
+                val frequency = amount.coerceAtLeast(0.1)
+                manager.dspFilter.vFrequency = frequency.toFloat()
+                ctx.send("Vibrato `frequency` set to `$frequency`")
             }
             else -> ctx.send("Invalid choice `$type`, pick one of `depth`/`frequency`.")
         }

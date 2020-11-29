@@ -256,6 +256,7 @@ class MusicManagerV2(val guildId: Long, val player: AudioPlayer) : AudioSendHand
 
     override fun onTrackException(player: AudioPlayer, track: AudioTrack, exception: FriendlyException) {
         repeatOption = RepeatOption.NONE
+        dspFilter.clearFilters()
 
         if (exception.toString().contains("decoding")) {
             return
