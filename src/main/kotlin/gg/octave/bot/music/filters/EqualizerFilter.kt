@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.filter.equalizer.Equalizer
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
 
 class EqualizerFilter : FilterConfig<Equalizer> {
+    override val name: String = "Equalizer"
     private var config: Equalizer.() -> Unit = {}
 
     override fun configure(transformer: Equalizer.() -> Unit): EqualizerFilter {
@@ -39,6 +40,10 @@ class EqualizerFilter : FilterConfig<Equalizer> {
     override fun build(downstream: FloatPcmAudioFilter, format: AudioDataFormat): FloatPcmAudioFilter {
         return Equalizer(format.channelCount, downstream, zero)
             .also(config)
+    }
+
+    override fun formatParameters(dspFilter: DSPFilter): String {
+        throw UnsupportedOperationException()
     }
 
     companion object {

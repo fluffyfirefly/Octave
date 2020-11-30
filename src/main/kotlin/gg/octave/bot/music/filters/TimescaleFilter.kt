@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
 
 class TimescaleFilter : FilterConfig<TimescalePcmAudioFilter> {
+    override val name: String = "Timescale"
     private var config: TimescalePcmAudioFilter.() -> Unit = {}
 
     override fun configure(transformer: TimescalePcmAudioFilter.() -> Unit): TimescaleFilter {
@@ -39,5 +40,19 @@ class TimescaleFilter : FilterConfig<TimescalePcmAudioFilter> {
     override fun build(downstream: FloatPcmAudioFilter, format: AudioDataFormat): FloatPcmAudioFilter {
         return TimescalePcmAudioFilter(downstream, format.channelCount, format.sampleRate)
             .also(config)
+    }
+
+    override fun formatParameters(dspFilter: DSPFilter): String { // hack
+        return buildString {
+            append("Rate: `")
+            append(dspFilter.tsRate)
+            append("`\n")
+            append("Pitch: `")
+            append(dspFilter.tsPitch)
+            append("`\n")
+            append("Speed: `")
+            append(dspFilter.tsSpeed)
+            append("`")
+        }
     }
 }

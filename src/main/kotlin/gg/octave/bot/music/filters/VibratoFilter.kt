@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
 
 class VibratoFilter : FilterConfig<VibratoPcmAudioFilter> {
+    override val name: String = "Vibrato"
     private var config: VibratoPcmAudioFilter.() -> Unit = {}
 
     override fun configure(transformer: VibratoPcmAudioFilter.() -> Unit): VibratoFilter {
@@ -39,5 +40,32 @@ class VibratoFilter : FilterConfig<VibratoPcmAudioFilter> {
     override fun build(downstream: FloatPcmAudioFilter, format: AudioDataFormat): FloatPcmAudioFilter {
         return VibratoPcmAudioFilter(downstream, format.channelCount, format.sampleRate)
             .also(config)
+    }
+
+    override fun formatParameters(dspFilter: DSPFilter): String { // hack
+        return buildString {
+            append("Depth: `")
+            append(dspFilter.vDepth)
+            append("`\n")
+            append("Frequency: `")
+            append(dspFilter.vFrequency)
+            append("`\n")
+            append("Strength: `")
+            append(dspFilter.vStrength)
+            append("`")
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VibratoFilter
+
+        return name == other.name
+    }
+
+    override fun hashCode(): Int {
+        return name.hashCode()
     }
 }

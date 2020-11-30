@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
 
 class KaraokeFilter : FilterConfig<KaraokePcmAudioFilter> {
+    override val name: String = "Karaoke"
     private var config: KaraokePcmAudioFilter.() -> Unit = {}
 
     override fun configure(transformer: KaraokePcmAudioFilter.() -> Unit): KaraokeFilter {
@@ -39,5 +40,19 @@ class KaraokeFilter : FilterConfig<KaraokePcmAudioFilter> {
     override fun build(downstream: FloatPcmAudioFilter, format: AudioDataFormat): FloatPcmAudioFilter {
         return KaraokePcmAudioFilter(downstream, format.channelCount, format.sampleRate)
             .also(config)
+    }
+
+    override fun formatParameters(dspFilter: DSPFilter): String { // hack
+        return buildString {
+            append("Level: `")
+            append(dspFilter.kLevel)
+            append("`\n")
+            append("Band: `")
+            append(dspFilter.kFilterBand)
+            append("`\n")
+            append("Width: `")
+            append(dspFilter.kFilterWidth)
+            append("`")
+        }
     }
 }

@@ -78,7 +78,52 @@ class DSPFilter(private val player: AudioPlayer) {
     var vStrength = 1
         set(value) = applyFilters { field = value }
 
-    private fun buildFilters(configs: List<FilterConfig<*>>, format: AudioDataFormat,
+    fun getEnabledFilters(distinct: Boolean = false): Collection<FilterConfig<*>> {
+        val filterConfigs = if (distinct) mutableSetOf<FilterConfig<*>>() else mutableListOf<FilterConfig<*>>()
+
+        if (karaokeEnable) {
+            filterConfigs.add(KaraokeFilter().configure {
+                level = kLevel
+                filterBand = kFilterBand
+                filterWidth = kFilterWidth
+            })
+        }
+
+        if (timescaleEnable) {
+            filterConfigs.add(TimescaleFilter().configure {
+                pitch = tsPitch
+                speed = tsSpeed
+                rate = tsRate
+            })
+        }
+
+        if (tremoloEnable) {
+            filterConfigs.add(TremoloFilter().configure {
+                depth = tDepth
+                frequency = tFrequency
+            })
+        }
+
+        if (vibratoEnable) {
+            for (i in 0 until vStrength) {
+                filterConfigs.add(VibratoFilter().configure {
+                    depth = vDepth
+                    frequency = vFrequency
+                })
+            }
+        }
+
+        if (bassBoost != BoostSetting.OFF) {
+            filterConfigs.add(EqualizerFilter().configure {
+                setGain(0, bassBoost.band1)
+                setGain(1, bassBoost.band2)
+            })
+        }
+
+        return filterConfigs
+    }
+
+    private fun buildFilters(configs: Collection<FilterConfig<*>>, format: AudioDataFormat,
                      output: UniversalPcmAudioFilter): List<AudioFilter> {
         if (configs.isEmpty()) {
             return emptyList()
@@ -100,54 +145,7 @@ class DSPFilter(private val player: AudioPlayer) {
 
     fun applyFilters(preOperation: () -> Unit) {
         preOperation()
-        applyFilters()
-    }
-
-    fun applyFilters() {
-        player.setFilterFactory { _, format, output ->
-            val filterConfigs = mutableListOf<FilterConfig<*>>()
-
-            if (karaokeEnable) {
-                filterConfigs.add(KaraokeFilter().configure {
-                    level = kLevel
-                    filterBand = kFilterBand
-                    filterWidth = kFilterWidth
-                })
-            }
-
-            if (timescaleEnable) {
-                filterConfigs.add(TimescaleFilter().configure {
-                    pitch = tsPitch
-                    speed = tsSpeed
-                    rate = tsRate
-                })
-            }
-
-            if (tremoloEnable) {
-                filterConfigs.add(TremoloFilter().configure {
-                    depth = tDepth
-                    frequency = tFrequency
-                })
-            }
-
-            if (vibratoEnable) {
-                for (i in 0 until vStrength) {
-                    filterConfigs.add(VibratoFilter().configure {
-                        depth = vDepth
-                        frequency = vFrequency
-                    })
-                }
-            }
-
-            if (bassBoost != BoostSetting.OFF) {
-                filterConfigs.add(EqualizerFilter().configure {
-                    setGain(0, bassBoost.band1)
-                    setGain(1, bassBoost.band2)
-                })
-            }
-
-            return@setFilterFactory buildFilters(filterConfigs, format, output)
-        }
+        player.setFilterFactory { _, format, output -> buildFilters(getEnabledFilters(false), format, output) }
     }
 
     fun clearFilters() {

@@ -29,6 +29,7 @@ import gg.octave.bot.entities.framework.DonorOnly
 import gg.octave.bot.entities.framework.MusicCog
 import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.music.MusicManagerV2
+import gg.octave.bot.music.filters.EqualizerFilter
 import gg.octave.bot.utils.extensions.DEFAULT_SUBCOMMAND
 import gg.octave.bot.utils.extensions.manager
 import me.devoxin.flight.api.Context
@@ -46,36 +47,37 @@ class Filters : MusicCog {
     fun filter(ctx: Context) = DEFAULT_SUBCOMMAND(ctx)
 
     @Usages("depth 0.5", "frequency 6")
-    @SubCommand(description = "Wavy effect.")
+    @SubCommand(aliases = ["t", "tr", "trem"], description = "Wavy effect.")
     fun tremolo(ctx: Context, type: String, value: Double) = modifyTremolo(ctx, type, value, ctx.manager)
 
     @Usages("depth 0.5", "frequency 7", "strength 2")
-    @SubCommand(description = "Wobble effect.")
+    @SubCommand(aliases = ["v", "vi", "vibr"], description = "Wobble effect.")
     fun vibrato(ctx: Context, type: String, value: Double) = modifyVibrato(ctx, type, value, ctx.manager)
 
     @Usages("speed 1.5", "pitch 0.7", "rate 1.25")
-    @SubCommand(description = "Pitch, rate, and speed.")
+    @SubCommand(aliases = ["ts", "ti", "time"], description = "Pitch, rate, and speed.")
     fun timescale(ctx: Context, type: String, value: Double) = modifyTimescale(ctx, type, value, ctx.manager)
 
     @Usages("width 100", "level 1", "band 200")
-    @SubCommand(description = "Karaoke settings for better vocal filtering.")
+    @SubCommand(aliases = ["k", "ka", "kara"], description = "Karaoke settings for better vocal filtering.")
     fun karaoke(ctx: Context, type: String?, value: Float?) = modifyKaraoke(ctx, type, value, ctx.manager)
 
-    @SubCommand(description = "Check the current status of filters.")
+    @SubCommand(aliases = ["s", "st", "stat"], description = "Check the current status of filters.")
     fun status(ctx: Context) {
-        val manager = ctx.manager
-        val karaokeStatus = if (manager.dspFilter.karaokeEnable) "Enabled" else "Disabled"
-        val tremoloStatus = if (manager.dspFilter.tremoloEnable) "Enabled" else "Disabled"
-        val timescaleStatus = if (manager.dspFilter.timescaleEnable) "Enabled" else "Disabled"
-        val vibratoStatus = if (manager.dspFilter.vibratoEnable) "Enabled" else "Disabled"
+        val dspFilter = ctx.manager.dspFilter
+        val enabledFilters = dspFilter.getEnabledFilters(true).filter { it !is EqualizerFilter }
 
         ctx.send {
             setColor(0x9570D3)
-            setTitle("Music Effects")
-            addField("Karaoke", karaokeStatus, true)
-            addField("Timescale", timescaleStatus, true)
-            addField("Tremolo", tremoloStatus, true)
-            addField("Vibrato", vibratoStatus, true)
+            setTitle("Enabled Music Effects")
+
+            if (enabledFilters.isEmpty()) {
+                setDescription("No effects are enabled. You can access available effects with `${ctx.trigger}fx`.")
+            } else {
+                for (filter in enabledFilters) {
+                    addField(filter.name, filter.formatParameters(dspFilter), true)
+                }
+            }
         }
     }
 
@@ -89,9 +91,9 @@ class Filters : MusicCog {
         val value = amount.coerceIn(0.1, 3.0)
 
         when (type) {
-            "pitch" -> manager.dspFilter.tsPitch = value
-            "speed" -> manager.dspFilter.tsSpeed = value
-            "rate" -> manager.dspFilter.tsRate = value
+            "pitch", "p" -> manager.dspFilter.tsPitch = value
+            "speed", "s" -> manager.dspFilter.tsSpeed = value
+            "rate", "r" -> manager.dspFilter.tsRate = value
             else -> return ctx.send("Invalid choice `$type`, pick one of `pitch`/`speed`/`rate`.")
         }
 
@@ -100,12 +102,12 @@ class Filters : MusicCog {
 
     private fun modifyTremolo(ctx: Context, type: String, amount: Double, manager: MusicManagerV2) {
         when (type) {
-            "depth" -> {
+            "depth", "d" -> {
                 val depth = amount.coerceIn(0.0, 1.0)
                 manager.dspFilter.tDepth = depth.toFloat()
                 ctx.send("Tremolo `depth` set to `$depth`")
             }
-            "frequency" -> {
+            "frequency", "freq", "f" -> {
                 val frequency = amount.coerceAtLeast(0.1)
                 manager.dspFilter.tFrequency = frequency.toFloat()
                 ctx.send("Tremolo `frequency` set to `$frequency`")
@@ -116,17 +118,17 @@ class Filters : MusicCog {
 
     private fun modifyVibrato(ctx: Context, type: String, amount: Double, manager: MusicManagerV2) {
         when (type) {
-            "depth" -> {
+            "depth", "d" -> {
                 val depth = amount.coerceIn(0.0, 1.0)
                 manager.dspFilter.vDepth = depth.toFloat()
                 ctx.send("Vibrato `depth` set to `$depth`")
             }
-            "frequency" -> {
+            "frequency", "freq", "f" -> {
                 val frequency = amount.coerceIn(0.1, 14.0)
                 manager.dspFilter.vFrequency = frequency.toFloat()
                 ctx.send("Vibrato `frequency` set to `$frequency`")
             }
-            "strength" -> {
+            "strength", "s" -> {
                 val strength = amount.toInt().coerceIn(1, 3)
                 manager.dspFilter.vStrength = strength
                 ctx.send("Vibrato `strength` set to $strength")
@@ -141,13 +143,21 @@ class Filters : MusicCog {
         }
 
         when (type) {
-            "level" -> {
+            "level", "lvl", "l" -> {
                 val level = amount!!.coerceAtLeast(0.0f)
                 manager.dspFilter.kLevel = level
                 return ctx.send("Karaoke `$type` set to `$level`")
             }
-            "band" -> manager.dspFilter.kFilterBand = amount!!
-            "width" -> manager.dspFilter.kFilterWidth = amount!!
+            "band", "b" -> manager.dspFilter.kFilterBand = amount!!
+            "width", "w" -> manager.dspFilter.kFilterWidth = amount!!
+//            "reset", "r" -> {
+//                manager.dspFilter.apply {
+//                    kLevel = 0.0f
+//                    kFilterBand = 220f
+//                    kFilterWidth = 100f
+//                }
+//                return ctx.send("Karaoke filter reset.")
+//            }
             else -> return ctx.send("Invalid choice, `type` must be `level`/`band`/`width`.")
         }
 

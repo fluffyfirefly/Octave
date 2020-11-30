@@ -29,6 +29,7 @@ import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
 
 class TremoloFilter : FilterConfig<TremoloPcmAudioFilter> {
+    override val name: String = "Tremolo"
     private var config: TremoloPcmAudioFilter.() -> Unit = {}
 
     override fun configure(transformer: TremoloPcmAudioFilter.() -> Unit): TremoloFilter {
@@ -39,5 +40,16 @@ class TremoloFilter : FilterConfig<TremoloPcmAudioFilter> {
     override fun build(downstream: FloatPcmAudioFilter, format: AudioDataFormat): FloatPcmAudioFilter {
         return TremoloPcmAudioFilter(downstream, format.channelCount, format.sampleRate)
             .also(config)
+    }
+
+    override fun formatParameters(dspFilter: DSPFilter): String { // hack
+        return buildString {
+            append("Depth: `")
+            append(dspFilter.tDepth)
+            append("`\n")
+            append("Frequency: `")
+            append(dspFilter.tFrequency)
+            append("`")
+        }
     }
 }
