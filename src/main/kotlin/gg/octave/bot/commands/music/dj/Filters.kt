@@ -47,22 +47,22 @@ class Filters : MusicCog {
     fun filter(ctx: Context) = DEFAULT_SUBCOMMAND(ctx)
 
     @Usages("depth 0.5", "frequency 6")
-    @SubCommand(aliases = ["t", "tr", "trem"], description = "Wavy effect.")
+    @SubCommand(aliases = ["t", "tr", "trem"], description = "Applies a \"wavy\" effect.")
     fun tremolo(ctx: Context, type: String, value: Double) = modifyTremolo(ctx, type, value, ctx.manager)
 
     @Usages("depth 0.5", "frequency 7", "strength 2")
-    @SubCommand(aliases = ["v", "vi", "vibr"], description = "Wobble effect.")
+    @SubCommand(aliases = ["v", "vi", "vibr"], description = "Applies a \"wobble\" effect.")
     fun vibrato(ctx: Context, type: String, value: Double) = modifyVibrato(ctx, type, value, ctx.manager)
 
     @Usages("speed 1.5", "pitch 0.7", "rate 1.25")
-    @SubCommand(aliases = ["ts", "ti", "time"], description = "Pitch, rate, and speed.")
+    @SubCommand(aliases = ["ts", "ti", "time"], description = "Adjust the pitch, rate, and speed.")
     fun timescale(ctx: Context, type: String, value: Double) = modifyTimescale(ctx, type, value, ctx.manager)
 
     @Usages("width 100", "level 1", "band 200")
-    @SubCommand(aliases = ["k", "ka", "kara"], description = "Karaoke settings for better vocal filtering.")
+    @SubCommand(aliases = ["k", "ka", "kara"], description = "Vocal filtering adjustments so you can singalong.")
     fun karaoke(ctx: Context, type: String?, value: Float?) = modifyKaraoke(ctx, type, value, ctx.manager)
 
-    @SubCommand(aliases = ["s", "st", "stat"], description = "Check the current status of filters.")
+    @SubCommand(aliases = ["s", "st", "stat"], description = "View the current status of filters.")
     fun status(ctx: Context) {
         val dspFilter = ctx.manager.dspFilter
         val enabledFilters = dspFilter.getEnabledFilters(true).filter { it !is EqualizerFilter }
