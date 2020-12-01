@@ -78,6 +78,12 @@ class DSPFilter(private val player: AudioPlayer) {
     var vStrength = 1
         set(value) = applyFilters { field = value }
 
+    val lowPassEnable: Boolean
+        get() = lpLevel != 1f
+
+    var lpLevel = 1f
+        set(value) = applyFilters { field = value }
+
     fun getEnabledFilters(distinct: Boolean = false): Collection<FilterConfig<*>> {
         val filterConfigs = if (distinct) mutableSetOf<FilterConfig<*>>() else mutableListOf<FilterConfig<*>>()
 
@@ -111,6 +117,12 @@ class DSPFilter(private val player: AudioPlayer) {
                     frequency = vFrequency
                 })
             }
+        }
+
+        if (lowPassEnable) {
+            filterConfigs.add(LowPassFilter().configure {
+                smoothingFactor = lpLevel
+            })
         }
 
         if (bassBoost != BoostSetting.OFF) {
@@ -155,6 +167,7 @@ class DSPFilter(private val player: AudioPlayer) {
         kLevel = 0.0f
         tDepth = 0.0f
         vDepth = 0.0f
+        lpLevel = 1.0f
 
         tsPitch = 1.0
         tsRate = 1.0

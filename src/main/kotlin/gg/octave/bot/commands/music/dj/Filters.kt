@@ -62,6 +62,10 @@ class Filters : MusicCog {
     @SubCommand(aliases = ["k", "ka", "kara"], description = "Vocal filtering adjustments so you can singalong.")
     fun karaoke(ctx: Context, type: String?, value: Float?) = modifyKaraoke(ctx, type, value, ctx.manager)
 
+    @Usages("level 30")
+    @SubCommand(aliases = ["l", "lp", "low"], description = "Cuts out higher frequencies.")
+    fun lowpass(ctx: Context, type: String, value: Double) = modifyLowPass(ctx, type, value, ctx.manager)
+
     @SubCommand(aliases = ["s", "st", "stat"], description = "View the current status of filters.")
     fun status(ctx: Context) {
         val dspFilter = ctx.manager.dspFilter
@@ -134,6 +138,17 @@ class Filters : MusicCog {
                 ctx.send("Vibrato `strength` set to $strength")
             }
             else -> ctx.send("Invalid choice `$type`, pick one of `depth`/`frequency`.")
+        }
+    }
+
+    private fun modifyLowPass(ctx: Context, type: String, amount: Double, manager: MusicManagerV2) {
+        when (type) {
+            "level", "l" -> {
+                val level = amount.coerceIn(1.0, 150.0)
+                manager.dspFilter.lpLevel = level.toFloat()
+                ctx.send("Low pass `level` set to `$level`")
+            }
+            else -> ctx.send("Invalid choice `$type`, pick one of `level`.")
         }
     }
 
