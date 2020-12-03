@@ -33,8 +33,8 @@ class PatreonUser(
     val email: String,
     val pledgeCents: Int,
     val isDeclined: Boolean,
-    val discordId: Long?,
-    val tier: PatronTier
+    val discordId: Long?/*,
+    val tier: PatronTier*/
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -69,8 +69,8 @@ class PatreonUser(
                 userAttr.getString("email"),
                 pledgeAttr.getInt("amount_cents"),
                 !pledgeAttr.isNull("declined_since"),
-                discordId,
-                PatronTier.from(tierId)
+                discordId/*,
+                PatronTier.from(tierId)*/
             )
         }
     }

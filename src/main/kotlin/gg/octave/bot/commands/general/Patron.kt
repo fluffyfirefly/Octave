@@ -98,8 +98,8 @@ class Patron : Cog {
                         "We are unable to link your account until this is resolved.")
                 }
 
-                val tierAmount = if (pledge.tier != PatronTier.UNKNOWN) pledge.tier.tierAmountCents.toDouble() else 0.0
-                val pledgeAmount = max(tierAmount, pledge.pledgeCents.toDouble()) / 100
+                //val tierAmount = if (pledge.tier != PatronTier.UNKNOWN) pledge.tier.tierAmountCents.toDouble() else 0.0
+                val pledgeAmount = /*max(tierAmount, */pledge.pledgeCents.toDouble() / 100
 
                 val user = PremiumUser(ctx.author.id)
                     .setPledgeAmount(pledgeAmount)
