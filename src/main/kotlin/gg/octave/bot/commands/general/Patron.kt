@@ -25,6 +25,7 @@
 package gg.octave.bot.commands.general
 
 import gg.octave.bot.Launcher
+import gg.octave.bot.apis.patreon.PatronTier
 import gg.octave.bot.db.premium.PremiumGuild
 import gg.octave.bot.db.premium.PremiumUser
 import gg.octave.bot.utils.extensions.DEFAULT_SUBCOMMAND
@@ -71,7 +72,7 @@ class Patron : Cog {
             setTitle("Premium Status")
             setDescription("Status for <@$userId>")
             addField("Is Premium?", if (!premiumUser.isPremium) "No" else "Yes", true)
-            addField("Pledge Amount", String.format("$%1$,.2f", premiumUser.pledgeAmount), true)
+            addField("Subscription Amount", String.format("$%1$,.2f", premiumUser.pledgeAmount), true)
             addField("Premium Servers", "$premiumServers/$totalServers", true)
         }
     }
@@ -97,7 +98,8 @@ class Patron : Cog {
                         "We are unable to link your account until this is resolved.")
                 }
 
-                val pledgeAmount = pledge.pledgeCents.toDouble() / 100
+                val tierAmount = if (pledge.tier != PatronTier.UNKNOWN) pledge.tier.tierAmountCents.toDouble() else 0.0
+                val pledgeAmount = max(tierAmount, pledge.pledgeCents.toDouble()) / 100
 
                 val user = PremiumUser(ctx.author.id)
                     .setPledgeAmount(pledgeAmount)

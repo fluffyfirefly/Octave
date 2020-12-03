@@ -33,7 +33,8 @@ class PatreonUser(
     val email: String,
     val pledgeCents: Int,
     val isDeclined: Boolean,
-    val discordId: Long?
+    val discordId: Long?,
+    val tier: PatronTier
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -55,6 +56,12 @@ class PatreonUser(
             val discordId = connections.optJSONObject("discord")
                 ?.getLong("user_id")
 
+            val tierId = pledgeObj.getJSONObject("relationships")
+                ?.optJSONObject("reward")
+                ?.optJSONObject("data")
+                ?.optInt("id")
+                ?: 0
+
             return PatreonUser(
                 userObj.getInt("id"),
                 userAttr.getString("first_name"),
@@ -62,7 +69,8 @@ class PatreonUser(
                 userAttr.getString("email"),
                 pledgeAttr.getInt("amount_cents"),
                 !pledgeAttr.isNull("declined_since"),
-                discordId
+                discordId,
+                PatronTier.from(tierId)
             )
         }
     }

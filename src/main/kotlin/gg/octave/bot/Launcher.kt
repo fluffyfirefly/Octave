@@ -137,3 +137,5 @@ object Launcher {
         NodeInfoPoster(configuration.nodeNumber).postEvery(5, TimeUnit.SECONDS)
     }
 }
+
+// FUN IDEA: Converter that continually swaps between L+R channels

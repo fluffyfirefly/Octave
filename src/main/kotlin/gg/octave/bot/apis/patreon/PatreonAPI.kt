@@ -25,6 +25,7 @@
 package gg.octave.bot.apis.patreon
 
 import gg.octave.bot.Launcher
+import gg.octave.bot.db.premium.PremiumUser
 import gg.octave.bot.utils.RequestUtil
 import io.sentry.Sentry
 import okhttp3.HttpUrl
@@ -55,7 +56,7 @@ class PatreonAPI(var accessToken: String?) {
             var removed = 0
             var fatal = 0
 
-            for (entry in storedPledges) {
+            for (entry in storedPledges.filterNot(PremiumUser::isOverride)) {
                 try {
                     val userId = entry.idLong
                     val pledge = pledges.firstOrNull { it.discordId != null && it.discordId == userId }
