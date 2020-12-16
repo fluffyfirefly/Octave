@@ -22,42 +22,37 @@
  * SOFTWARE.
  */
 
-package gg.octave.bot.music.filters.impl.lowpass
+package gg.octave.bot.music.filters.impl.fader
 
 import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
+import kotlin.math.cos
+import kotlin.math.sin
 
-open class LowPassConverter(private val downstream: FloatPcmAudioFilter, channelCount: Int) : FloatPcmAudioFilter {
-    var smoothingFactor = 20f
-
-    private val values = FloatArray(channelCount)
-    private var initialized = false
+open class FaderConverter(private val downstream: FloatPcmAudioFilter) : FloatPcmAudioFilter {
+    var x = 0.0
+    val delta = 0.01
 
     override fun process(input: Array<out FloatArray>, offset: Int, length: Int) {
-        if (!initialized) {
-            for (c in input.indices) {
-                values[c] = input[c][offset]
-            }
-
-            initialized = true
-        }
-
-        for (c in input.indices) {
-            var value = values[c]
+        for (c in input.indices) { // channel
+            val isL = first && c % 2 == 0
 
             for (i in offset until offset + length) {
-                val currentValue = input[c][i]
-                value += (currentValue - value) / smoothingFactor
-                input[c][i] = value
-            }
+                val sample = input[c][i]
 
-            values[c] = value
+                if (isL) {
+                    input[c][i] = ((sin(x) + 1) * sample).toFloat()
+                } else {
+                    input[c][i] = ((cos(x + Math.PI / 2) + 1) * sample).toFloat()
+                }
+            }
         }
 
+        x += delta
         downstream.process(input, offset, length)
     }
 
     override fun seekPerformed(requestedTime: Long, providedTime: Long) {
-        initialized = false
+
     }
 
     override fun flush() {

@@ -95,8 +95,8 @@ class MusicManagerV2(val guildId: Long, val player: AudioPlayer) : AudioSendHand
 
     fun openAudioConnection(channel: VoiceChannel, ctx: Context): Boolean {
         when {
-            !guild?.selfMember!!.hasPermission(channel, Permission.VOICE_CONNECT) -> {
-                ctx.send("The bot can't connect to this channel due to a lack of permission.")
+            !guild?.selfMember!!.hasPermission(channel, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK) -> {
+                ctx.send("Unable to connect to **${channel.name}**. I must have permission to `Connect` and `Speak`.")
                 destroy()
                 return false
             }

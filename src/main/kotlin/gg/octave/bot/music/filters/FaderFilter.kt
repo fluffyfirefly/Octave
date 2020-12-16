@@ -22,49 +22,32 @@
  * SOFTWARE.
  */
 
-package gg.octave.bot.music.filters.impl.lowpass
+package gg.octave.bot.music.filters
 
 import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
+import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
+import gg.octave.bot.music.filters.impl.fader.FaderPcmAudioFilter
+import gg.octave.bot.music.filters.impl.lowpass.LowPassPcmAudioFilter
 
-open class LowPassConverter(private val downstream: FloatPcmAudioFilter, channelCount: Int) : FloatPcmAudioFilter {
-    var smoothingFactor = 20f
+class FaderFilter : FilterConfig<FaderPcmAudioFilter> {
+    override val name: String = "Fader"
+    private var config: FaderPcmAudioFilter.() -> Unit = {}
 
-    private val values = FloatArray(channelCount)
-    private var initialized = false
+    override fun configure(transformer: FaderPcmAudioFilter.() -> Unit): FaderFilter {
+        config = transformer
+        return this
+    }
 
-    override fun process(input: Array<out FloatArray>, offset: Int, length: Int) {
-        if (!initialized) {
-            for (c in input.indices) {
-                values[c] = input[c][offset]
-            }
+    override fun build(downstream: FloatPcmAudioFilter, format: AudioDataFormat): FloatPcmAudioFilter {
+        return FaderPcmAudioFilter(downstream)
+            .also(config)
+    }
 
-            initialized = true
+    override fun formatParameters(dspFilter: DSPFilter): String { // hack
+        return buildString {
+            append("Level: `")
+            append(dspFilter.lpLevel)
+            append("`")
         }
-
-        for (c in input.indices) {
-            var value = values[c]
-
-            for (i in offset until offset + length) {
-                val currentValue = input[c][i]
-                value += (currentValue - value) / smoothingFactor
-                input[c][i] = value
-            }
-
-            values[c] = value
-        }
-
-        downstream.process(input, offset, length)
-    }
-
-    override fun seekPerformed(requestedTime: Long, providedTime: Long) {
-        initialized = false
-    }
-
-    override fun flush() {
-
-    }
-
-    override fun close() {
-
     }
 }
