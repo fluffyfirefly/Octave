@@ -34,7 +34,7 @@ open class FaderConverter(private val downstream: FloatPcmAudioFilter) : FloatPc
 
     override fun process(input: Array<out FloatArray>, offset: Int, length: Int) {
         for (c in input.indices) { // channel
-            val isL = first && c % 2 == 0
+            val isL = c % 2 == 0
 
             for (i in offset until offset + length) {
                 val sample = input[c][i]
