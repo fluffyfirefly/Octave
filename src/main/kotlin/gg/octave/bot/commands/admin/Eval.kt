@@ -38,7 +38,15 @@ class Eval : Cog {
 
     @Command(description = "Evaluate Kotlin code.", developerOnly = true)
     fun eval(ctx: Context, @Greedy code: String) {
-        val stripped = code.replace("^```\\w+".toRegex(), "").removeSuffix("```")
+        val imports = code.lines()
+            .takeWhile { it.startsWith("import ") }
+            .joinToString("\n", postfix = "\n")
+
+        val stripped = code.replace("^```\\w+".toRegex(), "")
+            .removeSuffix("```")
+            .lines()
+            .dropWhile { it.startsWith("import ") }
+            .joinToString("\n")
 
         val bindings = mutableMapOf(
             "bot" to Launcher,
@@ -57,7 +65,7 @@ class Eval : Cog {
         bind.putAll(bindings)
 
         try {
-            val result = engine.eval("$bindString\n$stripped", bind)
+            val result = engine.eval("$imports$bindString\n$stripped", bind)
                 ?: return ctx.message.addReaction("👌").queue()
 
             if (result is CompletableFuture<*>) {
