@@ -58,6 +58,8 @@ class BotCredentials(file: File) {
     val patreonRefreshToken: String? = config["patreon", "refresh"].string
     val patreonAccessToken: String? = config["patreon", "access"].string
 
+    val ksoftApiToken: String? = config["ksoft"].string
+
     /* Audio */
     val spotifyClientId: String? = config["spotify", "clientid"].string
     val spotifyClientSecret: String? = config["spotify", "clientsecret"].string

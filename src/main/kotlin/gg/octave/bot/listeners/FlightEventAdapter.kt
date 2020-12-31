@@ -36,6 +36,7 @@ import io.sentry.Sentry
 import me.devoxin.flight.api.CommandFunction
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.SubCommandFunction
+import me.devoxin.flight.api.entities.BucketType
 import me.devoxin.flight.api.exceptions.BadArgument
 import me.devoxin.flight.api.hooks.DefaultCommandEventAdapter
 import net.dv8tion.jda.api.Permission
@@ -103,7 +104,21 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
     }
 
     override fun onCommandCooldown(ctx: Context, command: CommandFunction, cooldown: Long) {
-        ctx.send("This command is on cool-down. Wait ${getDisplayValue(cooldown, true)}.")
+        val commandCooldown = command.cooldown!!
+
+        val entityId = when (commandCooldown.bucket) {
+            BucketType.USER -> ctx.author.idLong
+            BucketType.GUILD -> ctx.guild?.idLong ?: return
+            BucketType.GLOBAL -> -1
+        }
+
+        val currentCooldown = Launcher.ratelimiter.getCooldown(entityId, commandCooldown.bucket, command)
+            ?: return
+
+        if (!currentCooldown.hasWarned) {
+            currentCooldown.hasWarned = true
+            ctx.send("This command is on cool-down. Wait ${getDisplayValue(cooldown)}.")
+        }
     }
 
     @ExperimentalStdlibApi

@@ -34,3 +34,7 @@ fun Request.Builder.buildUrl(urlOpts: HttpUrl.Builder.() -> Unit): HttpUrl {
 fun Request.Builder.url(urlOpts: HttpUrl.Builder.() -> Unit) {
     url(buildUrl(urlOpts))
 }
+
+fun Request.Builder.url(base: String, urlOpts: HttpUrl.Builder.() -> Unit) {
+    url(HttpUrl.get(base).newBuilder().apply(urlOpts).build())
+}

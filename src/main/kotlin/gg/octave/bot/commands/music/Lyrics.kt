@@ -25,75 +25,107 @@
 package gg.octave.bot.commands.music
 
 import com.jagrosh.jdautilities.paginator
-import gg.octave.bot.utils.RequestUtil
+import gg.octave.bot.Launcher
 import gg.octave.bot.utils.extensions.launcher
+import kotlinx.coroutines.future.await
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
+import me.devoxin.flight.api.annotations.Cooldown
 import me.devoxin.flight.api.annotations.Greedy
 import me.devoxin.flight.api.annotations.SubCommand
+import me.devoxin.flight.api.entities.BucketType
 import me.devoxin.flight.api.entities.Cog
 import me.devoxin.flight.internal.utils.TextSplitter
 import org.json.JSONException
-import java.net.URLDecoder
-import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
 class Lyrics : Cog {
     @Command(description = "Shows the lyrics of the current song")
-    fun lyrics(ctx: Context) {
+    @Cooldown(duration = 2, timeUnit = TimeUnit.SECONDS, bucket = BucketType.GUILD)
+    suspend fun lyrics(ctx: Context) {
         val manager = ctx.launcher.players.getExisting(ctx.guild)
-            ?: return ctx.send("There's no player to be seen here.")
+            ?: return ctx.send("There's no player to be seen here. Did you mean `${ctx.trigger}lyrics search`?")
 
         val audioTrack = manager.player.playingTrack
-            ?: return ctx.send("There's no song playing currently.")
+            ?: return ctx.send("There's no song playing currently. Did you mean `${ctx.trigger}lyrics search`?")
 
         val title = audioTrack.info.title
         sendLyricsFor(ctx, title)
     }
 
     @SubCommand(description = "Search for specific song lyrics")
-    fun search(ctx: Context, @Greedy content: String) = sendLyricsFor(ctx, content)
+    suspend fun search(ctx: Context, @Greedy content: String) = sendLyricsFor(ctx, content)
 
-    private fun sendLyricsFor(ctx: Context, title: String) {
-        val encodedTitle = URLEncoder.encode(title, Charsets.UTF_8)
+    private suspend fun sendLyricsFor(ctx: Context, title: String) {
+        try {
+            val result = Launcher.ksoft.lyricsSearch(title).await().firstOrNull()?.takeIf { it.score > 20 }
+                ?: return ctx.send {
+                    setColor(0x9570D3)
+                    setDescription("No lyrics found for the given query.")
+                }
 
-        RequestUtil.jsonObject {
-            url("https://lyrics.tsu.sh/v1/?q=$encodedTitle")
-            header("User-Agent", "Octave (DiscordBot, https://github.com/Stardust-Discord/Octave)")
-        }.thenAccept {
-            if (!it.isNull("error")) {
-                return@thenAccept ctx.send("No lyrics found for `${ctx.cleanContent(title)}`. Try another song?")
-            }
+            val pages = TextSplitter.split(result.lyrics, 1000)
 
-            val lyrics = URLDecoder.decode(it.getString("content"), Charsets.UTF_8)
-                .replace("\n{2,}".toRegex(), "\n\n")
-                .replace("&amp;", "&")
-                .replace("([(\\[])([^\\n]*?)\\n+([^\\n)\\]]+)\\n+([)\\]])".toRegex(), "$1$2$3$4")
-            val pages = TextSplitter.split(lyrics, 1000)
+            ctx.launcher.eventWaiter.paginator {
+                setUser(ctx.author)
+                setTitle("Lyrics for ${result.artist} - ${result.name}")
+                setEmptyMessage("There should be something here 👀")
+                setItemsPerPage(1)
+                setTimeout(1, TimeUnit.MINUTES)
+                finally { message -> message?.delete()?.queue() }
 
-            val songObject = it.getJSONObject("song")
-            val fullTitle = songObject.getString("full_title")
-
-            ctx.textChannel?.let { tx ->
-                ctx.launcher.eventWaiter.paginator {
-                    setUser(ctx.author)
-                    setTitle("Lyrics for $fullTitle")
-                    setEmptyMessage("There should be something here 👀")
-                    setItemsPerPage(1)
-                    setTimeout(1, TimeUnit.MINUTES)
-                    finally { message -> message?.delete()?.queue() }
-
-                    for (page in pages) {
-                        entry { page }
-                    }
-                }.display(tx)
-            }
-        }.exceptionally {
-            when (it) {
+                for (page in pages) {
+                    entry { page }
+                }
+            }.display(ctx.messageChannel)
+        } catch (e: Throwable) {
+            when (e) {
                 is JSONException -> ctx.send("An invalid response was returned by the API. Try again?")
-                else -> ctx.send(it.localizedMessage)
+                else -> ctx.send(e.localizedMessage)
             }
-            return@exceptionally null
         }
     }
+
+//    private fun sendLyricsFor(ctx: Context, title: String) {
+//        val encodedTitle = URLEncoder.encode(title, Charsets.UTF_8)
+//
+//        RequestUtil.jsonObject {
+//            url("https://lyrics.tsu.sh/v1/?q=$encodedTitle")
+//            header("User-Agent", "Octave (DiscordBot, https://github.com/Stardust-Discord/Octave)")
+//        }.thenAccept {
+//            if (!it.isNull("error")) {
+//                return@thenAccept ctx.send("No lyrics found for `${ctx.cleanContent(title)}`. Try another song?")
+//            }
+//
+//            val lyrics = URLDecoder.decode(it.getString("content"), Charsets.UTF_8)
+//                .replace("\n{2,}".toRegex(), "\n\n")
+//                .replace("&amp;", "&")
+//                .replace("([(\\[])([^\\n]*?)\\n+([^\\n)\\]]+)\\n+([)\\]])".toRegex(), "$1$2$3$4")
+//            val pages = TextSplitter.split(lyrics, 1000)
+//
+//            val songObject = it.getJSONObject("song")
+//            val fullTitle = songObject.getString("full_title")
+//
+//            ctx.textChannel?.let { tx ->
+//                ctx.launcher.eventWaiter.paginator {
+//                    setUser(ctx.author)
+//                    setTitle("Lyrics for $fullTitle")
+//                    setEmptyMessage("There should be something here 👀")
+//                    setItemsPerPage(1)
+//                    setTimeout(1, TimeUnit.MINUTES)
+//                    finally { message -> message?.delete()?.queue() }
+//
+//                    for (page in pages) {
+//                        entry { page }
+//                    }
+//                }.display(tx)
+//            }
+//        }.exceptionally {
+//            when (it) {
+//                is JSONException -> ctx.send("An invalid response was returned by the API. Try again?")
+//                else -> ctx.send(it.localizedMessage)
+//            }
+//            return@exceptionally null
+//        }
+//    }
 }

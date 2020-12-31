@@ -27,6 +27,7 @@ package gg.octave.bot
 import com.jagrosh.jdautilities.waiter.EventWaiter
 import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
 import com.timgroup.statsd.NonBlockingStatsDClient
+import gg.octave.bot.apis.ksoft.KSoftClient
 import gg.octave.bot.apis.nodes.NodeInfoPoster
 import gg.octave.bot.apis.patreon.PatreonAPI
 import gg.octave.bot.apis.statsposter.StatsPoster
@@ -35,6 +36,7 @@ import gg.octave.bot.entities.BotCredentials
 import gg.octave.bot.entities.Configuration
 import gg.octave.bot.entities.ExtendedShardManager
 import gg.octave.bot.entities.framework.DefaultPrefixProvider
+import gg.octave.bot.entities.framework.Ratelimiter
 import gg.octave.bot.entities.framework.parsers.*
 import gg.octave.bot.listeners.BotListener
 import gg.octave.bot.listeners.FlightEventAdapter
@@ -66,9 +68,12 @@ object Launcher {
     val datadog = NonBlockingStatsDClient("statsd", "localhost", 8125)
     val statsPoster = StatsPoster(configuration.clientId)
     val patreon = PatreonAPI(credentials.patreonAccessToken)
+    val ksoft = KSoftClient(credentials.ksoftApiToken)
 
     val players = PlayerRegistry()
     val discordFm = DiscordFM()
+
+    val ratelimiter = Ratelimiter()
 
     lateinit var shardManager: ExtendedShardManager
         private set // begone foul modifications
@@ -122,6 +127,7 @@ object Launcher {
             .addEventListeners(FlightEventAdapter())
             .setExecutionThreadPool(commandExecutor)
             .configureDefaultHelpCommand { enabled = false }
+            .setCooldownProvider(ratelimiter)
             .build()
 
         shardManager = ExtendedShardManager.create(credentials.token) {

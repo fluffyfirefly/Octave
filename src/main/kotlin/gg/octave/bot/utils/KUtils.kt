@@ -89,11 +89,15 @@ fun getDisplayValue(ms: Long, shorthand: Boolean = false): String {
         shorthand && days > 0 -> String.format("%02d:%02d:%02d:%02d", days, hours, minutes, seconds)
         shorthand && hours > 0 -> String.format("%02d:%02d:%02d", hours, minutes, seconds)
         shorthand -> String.format("%02d:%02d", minutes, seconds)
-        days > 0 -> String.format("%d days, %d hours, %d minutes and %d seconds", days, hours, minutes, seconds)
-        hours > 0 -> String.format("%d hours, %d minutes and %d seconds", hours, minutes, seconds)
-        minutes > 0 -> String.format("%d minutes and %d seconds", minutes, seconds)
-        else -> String.format("%d seconds", seconds)
+        days > 0 -> String.format("%s, %s, %s and %s", plural(days, "day"), plural(hours, "hour"), plural(minutes, "minute"), plural(seconds, "second"))
+        hours > 0 -> String.format("%s, %s and %s", plural(hours, "hour"), plural(minutes, "minute"), plural(seconds, "second"))
+        minutes > 0 -> String.format("%s and %s", plural(minutes, "minute"), plural(seconds, "second"))
+        else -> plural(seconds, "second")
     }
+}
+
+private fun plural(amount: Long, word: String): String {
+    return "$amount $word${if (amount != 1L) "s" else ""}"
 }
 
 private fun getUnits(s: String): String {
