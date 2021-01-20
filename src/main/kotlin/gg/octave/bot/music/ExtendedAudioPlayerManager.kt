@@ -46,6 +46,7 @@ import com.sedmelluq.lava.extensions.youtuberotator.tools.ip.Ipv6Block
 import gg.octave.bot.Launcher
 import gg.octave.bot.music.sources.attachment.DiscordAttachmentAudioSourceManager
 import gg.octave.bot.music.sources.caching.CachingSourceManager
+import gg.octave.bot.music.sources.mixcloud.MixcloudAudioSourceManager
 import gg.octave.bot.music.sources.spotify.SpotifyAudioSourceManager
 import gg.octave.bot.music.utils.TrackContext
 import io.sentry.Sentry
@@ -100,6 +101,7 @@ class ExtendedAudioPlayerManager(private val dapm: AudioPlayerManager = DefaultA
         registerSourceManagers(
             youtubeAudioSourceManager,
             SoundCloudAudioSourceManager.createDefault(),
+            MixcloudAudioSourceManager(),
             GetyarnAudioSourceManager(),
             BandcampAudioSourceManager(),
             VimeoAudioSourceManager(),

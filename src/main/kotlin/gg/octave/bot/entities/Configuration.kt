@@ -59,8 +59,6 @@ class Configuration(file: File) {
     // +--------------+
     // Music Settings
     // +--------------+
-    val musicEnabled = config["music", "enabled"].getBoolean(true)
-    val searchEnabled = config["music", "search"].getBoolean(true)
     val bufferDuration = config["music", "buffer"].getInt(800)
 
     val queueLimit = config["music", "queue limit"].getInt(20)
