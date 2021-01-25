@@ -39,7 +39,7 @@ class Move : MusicCog {
     override fun requirePlayer() = true
 
     @DJ
-    @Command(aliases = ["m"], description = "Moves tracks within the queue.")
+    @Command(aliases = ["m", "mv"], description = "Moves tracks within the queue.")
     fun move(ctx: Context, trackIndex: Int, toIndex: Int) {
         val manager = ctx.manager
         val queue = manager.queue
