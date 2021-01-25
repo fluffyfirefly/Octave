@@ -11,6 +11,7 @@ import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 import me.devoxin.flight.api.annotations.Greedy
 import me.devoxin.flight.api.annotations.SubCommand
+import me.devoxin.flight.api.annotations.Tentative
 import me.devoxin.flight.api.entities.Cog
 import net.dv8tion.jda.api.EmbedBuilder
 import java.net.URL
@@ -227,7 +228,7 @@ class Playlists : Cog {
     }
 
     @SubCommand(aliases = ["play"], description = "Loads a custom playlist for playing.")
-    fun load(ctx: Context, @Greedy name: String) {
+    fun load(ctx: Context, @Tentative loadShuffled: Boolean = false, @Greedy name: String) {
         when {
             ctx.voiceChannel == null -> {
                 return ctx.send {
@@ -269,7 +270,7 @@ class Playlists : Cog {
         }
 
         val manager = Launcher.players.get(ctx.guild!!)
-        val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, null)
+        val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, loadShuffled,null)
         lrh.playlistLoaded(existingPlaylist.toBasicAudioPlaylist())
     }
 

@@ -84,7 +84,8 @@ class Radio : Cog {
         }
 
         if (manager.isIdle) {
-            LoadResultHandler.loadItem(track, ctx, manager, trackContext, false, "Now streaming random tracks from the `$library` radio station!")
+            LoadResultHandler.loadItem(track, ctx, manager, trackContext, false, shuffleEntries = false,
+                footnote = "Now streaming random tracks from the `$library` radio station!")
         }
     }
 
@@ -118,7 +119,7 @@ class Radio : Cog {
 
         if (manager.isIdle) {
             val lrh = LoadResultHandler(null, ctx, manager, trackContext, false,
-                "Now streaming random tracks from the playlist `${playlist.name}`!")
+                shuffleEntries = false, footnote = "Now streaming random tracks from the playlist `${playlist.name}`!")
 
             val randomTrack = Launcher.players.playerManager.decodeTrack(playlist.encodedTracks.random())
                 ?: return ctx.send {

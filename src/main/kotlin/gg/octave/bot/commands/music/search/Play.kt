@@ -165,17 +165,23 @@ class Play : Cog {
             //Reset expire time if play has been called.
             manager.queue.clearExpire()
 
+            val isShuffle = args.lastOrNull { it == "--shuffle" || it == "-s" }
+            val filteredArgs = isShuffle?.let {
+                val argumentIndex = args.lastIndexOf(isShuffle)
+                args.filterIndexed { index, _ -> index != argumentIndex }
+            } ?: args
+
             val query = when {
                 "https://" in args[0] || "http://" in args[0] || args[0].startsWith("spotify:") -> {
                     args[0].removePrefix("<").removeSuffix(">")
                 }
                 isSearchResult -> uri
-                else -> "ytsearch:${args.joinToString(" ").trim()}"
+                else -> "ytsearch:${filteredArgs.joinToString(" ").trim()}"
             }
 
             val trackContext = TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong)
             val footnote = if (!isSearchResult) "You can search and pick results using ${config.prefix}youtube or ${config.prefix}soundcloud while in a channel." else null
-            LoadResultHandler.loadItem(query, ctx, manager, trackContext, isNext, footnote)
+            LoadResultHandler.loadItem(query, ctx, manager, trackContext, isNext, isShuffle != null, footnote)
         }
 
         fun startPlayVote(ctx: Context, manager: MusicManagerV2, args: List<String>, isSearchResult: Boolean, uri: String, isNext: Boolean) {

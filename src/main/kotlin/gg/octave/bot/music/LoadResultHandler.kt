@@ -24,6 +24,7 @@ class LoadResultHandler(
     private val musicManager: MusicManagerV2,
     private val trackContext: TrackContext,
     private val isNext: Boolean,
+    private val shuffleEntries: Boolean,
     private val footnote: String? = null
 ) : AudioLoadResultHandler {
     private val settings = ctx.data
@@ -64,6 +65,7 @@ class LoadResultHandler(
 
         val queueLimit = queueLimit()
         val pendingEnqueue = playlist.tracks.filter { checkTrack(it, true) }
+            .let { if (shuffleEntries) it.shuffled() else it }
         var added = 0
 
         for (track in pendingEnqueue) {
@@ -208,8 +210,8 @@ class LoadResultHandler(
         private const val MAX_LOAD_RETRIES = 2
 
         fun loadItem(query: String, ctx: Context, musicManager: MusicManagerV2, trackContext: TrackContext,
-                     isNext: Boolean, footnote: String? = null) {
-            val resultHandler = LoadResultHandler(query, ctx, musicManager, trackContext, isNext, footnote)
+                     isNext: Boolean, shuffleEntries: Boolean, footnote: String? = null) {
+            val resultHandler = LoadResultHandler(query, ctx, musicManager, trackContext, isNext, shuffleEntries, footnote)
             Launcher.players.playerManager.loadItemOrdered(ctx.guild!!.idLong, query, resultHandler)
         }
     }
