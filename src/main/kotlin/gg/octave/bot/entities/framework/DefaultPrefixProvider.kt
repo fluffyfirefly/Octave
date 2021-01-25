@@ -38,7 +38,7 @@ class DefaultPrefixProvider : PrefixProvider {
             "<@!${message.jda.selfUser.id}> "
         )
 
-        val customPrefix = guildSettings.command.prefix
+        val customPrefix = guildSettings.command.prefix?.toLowerCase()
             ?: Launcher.configuration.prefix
 
         prefixes.add(customPrefix)
