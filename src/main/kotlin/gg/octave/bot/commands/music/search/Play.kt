@@ -25,6 +25,7 @@
 package gg.octave.bot.commands.music.search
 
 import gg.octave.bot.Launcher
+import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.listeners.FlightEventAdapter
 import gg.octave.bot.music.LoadResultHandler
 import gg.octave.bot.music.MusicManagerV2
@@ -45,6 +46,11 @@ import java.util.concurrent.TimeUnit
 
 class Play : Cog {
     @Command(aliases = ["p"], description = "Plays music in a voice channel.")
+    @Usages(
+        "https://www.youtube.com/watch?v=ITJttUsAHU4",
+        "https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLgcliw49-xcF7TF-uNX7acOGjfqc4gSZM",
+        "https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLgcliw49-xcF7TF-uNX7acOGjfqc4gSZM --shuffle"
+    )
     fun play(ctx: Context, @Greedy query: String?) {
         val botChannel = ctx.selfMember!!.voiceState?.channel
         val userChannel = ctx.voiceChannel ?: return ctx.send("You're not in a voice channel.")

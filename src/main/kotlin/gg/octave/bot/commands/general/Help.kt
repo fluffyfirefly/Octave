@@ -139,6 +139,18 @@ class Help : Cog {
             appendln("**Usage:** `${ctx.trigger}${parent.name} ${subcommand.name}`")
         }
 
+        val syntax = buildString {
+            append(ctx.trigger)
+            append(parent.name)
+            append(" ")
+            append(subcommand.name)
+            append(" ")
+            for (argument in subcommand.arguments) {
+                append(argument.name)
+                append(" ")
+            }
+        }.trim()
+
         ctx.send {
             setColor(0x9570D3)
             setTitle("Help | ${subcommand.name}")
@@ -146,6 +158,7 @@ class Help : Cog {
 
             if (subcommand.arguments.isNotEmpty()) {
                 val examples = subcommand.generateExampleUsage("${ctx.trigger}${parent.name} ${subcommand.name}")
+                addField("Syntax", "`$syntax`", false)
                 addField("Example Usage(s)", examples, false)
             }
         }

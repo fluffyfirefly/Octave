@@ -3,6 +3,7 @@ package gg.octave.bot.commands.music.playlists
 import com.sedmelluq.discord.lavaplayer.player.FunctionalResultHandler
 import gg.octave.bot.Launcher
 import gg.octave.bot.db.music.CustomPlaylist
+import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.music.LoadResultHandler
 import gg.octave.bot.music.utils.TrackContext
 import gg.octave.bot.utils.Page
@@ -228,7 +229,8 @@ class Playlists : Cog {
     }
 
     @SubCommand(aliases = ["play"], description = "Loads a custom playlist for playing.")
-    fun load(ctx: Context, @Tentative loadShuffled: Boolean = false, @Greedy name: String) {
+    @Usages("On Repeat", "yes Top Songs 2020")
+    fun load(ctx: Context, @Tentative shuffle: Boolean = false, @Greedy name: String) {
         when {
             ctx.voiceChannel == null -> {
                 return ctx.send {
@@ -270,7 +272,7 @@ class Playlists : Cog {
         }
 
         val manager = Launcher.players.get(ctx.guild!!)
-        val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, loadShuffled,null)
+        val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, shuffle,null)
         lrh.playlistLoaded(existingPlaylist.toBasicAudioPlaylist())
     }
 
