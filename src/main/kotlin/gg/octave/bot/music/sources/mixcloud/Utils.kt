@@ -1,5 +1,6 @@
 package gg.octave.bot.music.sources.mixcloud
 
+import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.*
@@ -28,4 +29,5 @@ object Utils {
     }
 
     internal fun String.urlEncoded() = URLEncoder.encode(this, Charset.defaultCharset())
+    internal fun String.urlDecoded() = URLDecoder.decode(this, Charset.defaultCharset())
 }

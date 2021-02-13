@@ -38,7 +38,7 @@ class Volume : MusicCog {
     override fun requirePlayer() = true
 
     private val totalBlocks = 20
-    private val maximumVolume = 150
+    private val maximumVolume = 200
 
     @DJ
     @DonorOnly

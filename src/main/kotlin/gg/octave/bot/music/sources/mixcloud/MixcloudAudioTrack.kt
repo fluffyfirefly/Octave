@@ -9,6 +9,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo
 import com.sedmelluq.discord.lavaplayer.track.DelegatedAudioTrack
 import com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor
+import gg.octave.bot.music.sources.mixcloud.Utils.urlDecoded
 import java.net.URI
 
 class MixcloudAudioTrack(trackInfo: AudioTrackInfo, private val sourceManager: MixcloudAudioSourceManager) : DelegatedAudioTrack(trackInfo) {
@@ -37,7 +38,7 @@ class MixcloudAudioTrack(trackInfo: AudioTrackInfo, private val sourceManager: M
     }
 
     private fun getPlaybackUrl(): String {
-        val json = sourceManager.extractTrackInfoGraphQl(trackInfo.author, trackInfo.identifier)
+        val json = sourceManager.extractTrackInfoGraphQl(trackInfo.author, trackInfo.identifier.urlDecoded())
             ?: throw FriendlyException("This track is unplayable", FriendlyException.Severity.SUSPICIOUS, null)
 
         val streamInfo = json.get("streamInfo")

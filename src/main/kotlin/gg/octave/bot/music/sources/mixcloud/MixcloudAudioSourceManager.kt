@@ -11,6 +11,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioItem
 import com.sedmelluq.discord.lavaplayer.track.AudioReference
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo
+import gg.octave.bot.music.sources.mixcloud.Utils.urlDecoded
 import gg.octave.bot.music.sources.mixcloud.Utils.urlEncoded
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.config.RequestConfig
@@ -40,11 +41,11 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
         }
 
         return try {
-            loadItemOnce(reference)
+            loadItemOnce(reference, matcher)
         } catch (exception: FriendlyException) {
             // In case of a connection reset exception, try once more.
             if (HttpClientTools.isRetriableNetworkException(exception.cause)) {
-                loadItemOnce(reference)
+                loadItemOnce(reference, matcher)
             } else {
                 throw exception
             }
@@ -71,14 +72,11 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
         httpInterfaceManager.configureBuilder(configurator)
     }
 
-    private fun loadItemOnce(reference: AudioReference): AudioItem? {
-        val matcher = URL_REGEX.matcher(reference.identifier)
-        if (!matcher.matches()) {
-            return null
-        }
-
+    private fun loadItemOnce(reference: AudioReference, matcher: Matcher): AudioItem? {
         try {
-            val trackInfo = extractTrackInfoGraphQl(matcher) ?: return null
+            val username = matcher.group(1).urlDecoded()
+            val slug = matcher.group(2).urlDecoded()
+            val trackInfo = extractTrackInfoGraphQl(username, slug) ?: return null
             //val trackInfo = getTrackInfo(reference.identifier) ?: return AudioReference.NO_TRACK
 
 //            if ("false".equals(trackInfo.get("isPlayable").text(), true)) {
@@ -98,15 +96,7 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
         }
     }
 
-    private fun extractTrackInfoGraphQl(matcher: Matcher): JsonBrowser? {
-        val username = matcher.group(1).urlEncoded()
-        val slug = matcher.group(2).urlEncoded()
-        return extractTrackInfoGraphQl(username, slug)
-    }
-
-    internal fun extractTrackInfoGraphQl(username: String, slug: String) = retrieveApiInfo(username, slug)
-
-    private fun retrieveApiInfo(username: String, slug: String? = null): JsonBrowser? {
+    internal fun extractTrackInfoGraphQl(username: String, slug: String? = null): JsonBrowser? {
         val slugFormatted = if (slug != null) String.format(", slug: \"%s\"", slug) else ""
         val query = String.format("{\n  cloudcastLookup(lookup: {username: \"%s\"%s}) {\n    %s\n  }\n}", username, slugFormatted, requestStructure)
         val encodedQuery = query.urlEncoded()
@@ -133,6 +123,7 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
     }
 
     private val requestStructure = """audioLength
+    isExclusive
     name
     owner {
       username
@@ -196,7 +187,6 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
             throw IllegalStateException("Missing key in JS")
         }
     }
-
 
     private fun buildTrackObject(uri: String, identifier: String, title: String, uploader: String, isStream: Boolean, duration: Long): MixcloudAudioTrack {
         return MixcloudAudioTrack(AudioTrackInfo(title, uploader, duration, identifier, isStream, uri), this)
