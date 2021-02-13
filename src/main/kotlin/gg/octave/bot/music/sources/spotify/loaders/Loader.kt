@@ -24,7 +24,7 @@
 
 package gg.octave.bot.music.sources.spotify.loaders
 
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.track.AudioItem
 import gg.octave.bot.music.sources.spotify.SpotifyAudioSourceManager
 import java.util.regex.Matcher
@@ -40,6 +40,6 @@ interface Loader {
     /**
      * Loads an AudioItem from the given regex match.
      */
-    fun load(manager: DefaultAudioPlayerManager, sourceManager: SpotifyAudioSourceManager, matcher: Matcher): AudioItem?
+    fun load(manager: AudioPlayerManager, sourceManager: SpotifyAudioSourceManager, matcher: Matcher): AudioItem?
 
 }

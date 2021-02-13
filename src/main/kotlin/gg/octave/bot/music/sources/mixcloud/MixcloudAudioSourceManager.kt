@@ -1,6 +1,6 @@
 package gg.octave.bot.music.sources.mixcloud
 
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.ExceptionTools
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
@@ -22,7 +22,6 @@ import java.io.DataInput
 import java.io.DataOutput
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.util.*
 import java.util.function.Consumer
 import java.util.function.Function
 import java.util.regex.Matcher
@@ -33,7 +32,7 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
 
     override fun getSourceName() = "mixcloud"
 
-    override fun loadItem(manager: DefaultAudioPlayerManager, reference: AudioReference): AudioItem? {
+    override fun loadItem(manager: AudioPlayerManager, reference: AudioReference): AudioItem? {
         val matcher = URL_REGEX.matcher(reference.identifier)
 
         if (!matcher.matches()) {
@@ -158,10 +157,6 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
 
             val content = IOUtils.toString(it.entity.content, StandardCharsets.UTF_8)
 
-//            if (content.contains("m-play-info")) { // legacy
-//                // TODO
-//            }
-
             val matcher = JSON_REGEX.matcher(content)
             check(matcher.find()) { "Missing MixCloud track JSON" }
 
@@ -201,7 +196,6 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
             throw IllegalStateException("Missing key in JS")
         }
     }
-
 
 
     private fun buildTrackObject(uri: String, identifier: String, title: String, uploader: String, isStream: Boolean, duration: Long): MixcloudAudioTrack {

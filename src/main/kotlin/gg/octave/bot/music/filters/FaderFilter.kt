@@ -27,7 +27,6 @@ package gg.octave.bot.music.filters
 import com.sedmelluq.discord.lavaplayer.filter.FloatPcmAudioFilter
 import com.sedmelluq.discord.lavaplayer.format.AudioDataFormat
 import gg.octave.bot.music.filters.impl.fader.FaderPcmAudioFilter
-import gg.octave.bot.music.filters.impl.lowpass.LowPassPcmAudioFilter
 
 class FaderFilter : FilterConfig<FaderPcmAudioFilter> {
     override val name: String = "Fader"

@@ -28,7 +28,7 @@ import com.sedmelluq.discord.lavaplayer.container.MediaContainerDescriptor
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerDetection
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerDetectionResult
 import com.sedmelluq.discord.lavaplayer.container.MediaContainerHints
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.ProbingAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException
 import com.sedmelluq.discord.lavaplayer.tools.Units
@@ -62,7 +62,7 @@ class DiscordAttachmentAudioSourceManager : ProbingAudioSourceManager(LimitedCon
 
     override fun getSourceName() = "attachment"
 
-    override fun loadItem(manager: DefaultAudioPlayerManager, reference: AudioReference): AudioItem? {
+    override fun loadItem(manager: AudioPlayerManager, reference: AudioReference): AudioItem? {
         if (!(reference.identifier matches cdnRegex)) {
             return null
         }

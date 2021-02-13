@@ -136,7 +136,7 @@ class DSPFilter(private val player: AudioPlayer) {
     }
 
     private fun buildFilters(configs: Collection<FilterConfig<*>>, format: AudioDataFormat,
-                     output: UniversalPcmAudioFilter): List<AudioFilter> {
+                             output: UniversalPcmAudioFilter): List<AudioFilter> {
         if (configs.isEmpty()) {
             return emptyList()
         }

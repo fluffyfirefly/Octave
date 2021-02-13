@@ -272,7 +272,7 @@ class Playlists : Cog {
         }
 
         val manager = Launcher.players.get(ctx.guild!!)
-        val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, shuffle,null)
+        val lrh = LoadResultHandler(null, ctx, manager, TrackContext(ctx.author.idLong, ctx.textChannel!!.idLong), false, shuffle, null)
         lrh.playlistLoaded(existingPlaylist.toBasicAudioPlaylist())
     }
 

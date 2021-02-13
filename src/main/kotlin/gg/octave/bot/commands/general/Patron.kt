@@ -25,7 +25,6 @@
 package gg.octave.bot.commands.general
 
 import gg.octave.bot.Launcher
-import gg.octave.bot.apis.patreon.PatronTier
 import gg.octave.bot.db.premium.PremiumGuild
 import gg.octave.bot.db.premium.PremiumUser
 import gg.octave.bot.utils.extensions.DEFAULT_SUBCOMMAND

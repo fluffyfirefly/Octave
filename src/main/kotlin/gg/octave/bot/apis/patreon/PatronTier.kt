@@ -2,6 +2,7 @@ package gg.octave.bot.apis.patreon
 
 enum class PatronTier(val tierId: Int, val tierName: String, val tierAmountCents: Int) {
     UNKNOWN(0, "Unknown", 0),
+
     /* Legacy Tiers */
     FLUFFY_GNAR_OLD(1763704, "Fluffy Gnar (OLD)", 100),
     DINO_GNAR_OLD(1763714, "Dino Gnar (OLD)", 200),
