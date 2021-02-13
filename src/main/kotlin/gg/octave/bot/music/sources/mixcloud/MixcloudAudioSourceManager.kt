@@ -123,7 +123,6 @@ class MixcloudAudioSourceManager : AudioSourceManager, HttpConfigurable {
     }
 
     private val requestStructure = """audioLength
-    isExclusive
     name
     owner {
       username
