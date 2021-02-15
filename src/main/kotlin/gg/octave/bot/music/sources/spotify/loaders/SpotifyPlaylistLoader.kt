@@ -87,7 +87,7 @@ class SpotifyPlaylistLoader : Loader {
                 val title = track.getString("name")
                 val artist = track.getJSONArray("artists").getJSONObject(0).getString("name")
 
-                val task = sourceManager.queueYoutubeSearch(manager, "ytsearch:$title $artist")
+                val task = sourceManager.queueYoutubeSearch(manager, "ytmsearch:$title $artist")
                     .thenApply { ai -> if (ai is AudioPlaylist) ai.tracks.first() else ai as AudioTrack }
                 tasks.add(task)
             }
