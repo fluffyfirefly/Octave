@@ -37,7 +37,9 @@ import gg.octave.bot.utils.extensions.voiceChannel
 import gg.octave.bot.utils.getDisplayValue
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
+import me.devoxin.flight.api.annotations.Cooldown
 import me.devoxin.flight.api.annotations.Greedy
+import me.devoxin.flight.api.entities.BucketType
 import me.devoxin.flight.api.entities.Cog
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -46,6 +48,7 @@ import java.util.concurrent.TimeUnit
 
 class Play : Cog {
     @Command(aliases = ["p"], description = "Plays music in a voice channel.")
+    @Cooldown(duration = 750, timeUnit = TimeUnit.MILLISECONDS, bucket = BucketType.USER)
     @Usages(
         "https://www.youtube.com/watch?v=ITJttUsAHU4",
         "https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLgcliw49-xcF7TF-uNX7acOGjfqc4gSZM",

@@ -116,6 +116,10 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
         val currentCooldown = Launcher.ratelimiter.getCooldown(entityId, commandCooldown.bucket, command)
             ?: return
 
+        if (cooldown < 1000) {
+            return
+        }
+
         if (!currentCooldown.hasWarned) {
             currentCooldown.hasWarned = true
             ctx.send("This command is on cool-down. Wait ${getDisplayValue(cooldown)}.")
