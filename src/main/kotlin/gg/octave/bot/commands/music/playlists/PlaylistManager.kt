@@ -44,6 +44,7 @@ class PlaylistManager(
     private val ctx: Context,
     private var msg: Message
 ) {
+    private val originalName = playlist.name
     private val tracks = playlist.decodedTracks
 
     private val pages: Int
@@ -235,7 +236,7 @@ class PlaylistManager(
                 ctx.send {
                     setColor(0x9571D3)
                     setTitle("Playlist Unchanged")
-                    setDescription("Discarded changes. If you wish to make any further modifications, re-run `${ctx.trigger}cpl edit ${playlist.name}`.")
+                    setDescription("Discarded changes. If you wish to make any further modifications, re-run `${ctx.trigger}cpl edit $originalName`.")
                 }
                 false
             }
