@@ -66,7 +66,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable:$kotlinVersion"
 
     // Discord
-    compile 'net.dv8tion:JDA:4.2.0_227'
+    compile 'net.dv8tion:JDA:4.2.0_228'
     compile 'club.minnced:discord-webhooks:0.5.4-rc'
 
     compile 'com.github.devoxin:flight:2.0.8'

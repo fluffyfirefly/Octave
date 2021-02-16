@@ -66,12 +66,9 @@ class PlayerStats : Cog {
     }
 
     private fun isEncoding(manager: MusicManagerV2): Boolean {
-        val hasDspFx = manager.dspFilter.let {
-            it.karaokeEnable || it.timescaleEnable || it.tremoloEnable || it.bassBoost != BoostSetting.OFF
-        }
-
         return manager.player.playingTrack != null &&
-            (manager.player.volume != 100 || hasDspFx || !opusSources.any { it in manager.player.playingTrack.info.uri })
+            (manager.player.volume != 100 || manager.dspFilter.isEncoding ||
+                !opusSources.any { it in manager.player.playingTrack.info.uri })
     }
 
     companion object {

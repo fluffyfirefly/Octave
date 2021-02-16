@@ -84,6 +84,10 @@ class DSPFilter(private val player: AudioPlayer) {
     var lpLevel = 1f
         set(value) = applyFilters { field = value }
 
+    val isEncoding: Boolean
+        get() = karaokeEnable || timescaleEnable || tremoloEnable || vibratoEnable || lowPassEnable ||
+            bassBoost != BoostSetting.OFF
+
     fun getEnabledFilters(distinct: Boolean = false): Collection<FilterConfig<*>> {
         val filterConfigs = if (distinct) mutableSetOf<FilterConfig<*>>() else mutableListOf<FilterConfig<*>>()
 
