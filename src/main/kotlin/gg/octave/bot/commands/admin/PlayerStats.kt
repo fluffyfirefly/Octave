@@ -30,20 +30,15 @@ import gg.octave.bot.music.settings.BoostSetting
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 import me.devoxin.flight.api.entities.Cog
+import org.jetbrains.kotlin.utils.addToStdlib.sumByLong
 import org.json.JSONObject
 
 class PlayerStats : Cog {
     @Command(aliases = ["ps"], description = "Shows (est) encoding, and total players", developerOnly = true)
     fun playerstats(ctx: Context) {
         val players = Launcher.players.registry.values
-        var musicPlayers = 0L
-
-        Launcher.database.jedisPool.resource.use {
-            val nodeStats = it.hgetAll("node-stats")
-            for (node in nodeStats) {
-                val jsonStats = JSONObject(node.value);
-                musicPlayers += jsonStats.getLong("music_players")
-            }
+        val musicPlayers = Launcher.database.jedisPool.resource.use { j ->
+            j.hgetAll("node-stats").map { JSONObject(it.value) }.sumByLong { it.getLong("music_players") }
         }
 
         val paused = players.count { it.player.isPaused }
