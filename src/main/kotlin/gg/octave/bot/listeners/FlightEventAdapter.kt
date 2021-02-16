@@ -28,6 +28,7 @@ import gg.octave.bot.Launcher
 import gg.octave.bot.db.guilds.GuildData
 import gg.octave.bot.entities.framework.DJ
 import gg.octave.bot.entities.framework.DonorOnly
+import gg.octave.bot.utils.OctaveBot
 import gg.octave.bot.utils.extensions.*
 import gg.octave.bot.utils.getDisplayValue
 import gg.octave.bot.utils.hasAnyRoleId
@@ -85,7 +86,7 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
             setDescription("You specified an invalid argument for `${error.argument.name}`")
             addField("Syntax", "`$syntax`", false)
             addField("Example Usage(s)", executed.generateExampleUsage(commandLayout), false)
-            addField("Still Confused?", "Head over to our [#support channel](https://discord.gg/musicbot)", false)
+            addField("Still Confused?", "Head over to our [#support channel](${OctaveBot.DISCORD_INVITE_LINK})", false)
         }
     }
 

@@ -24,6 +24,7 @@
 
 package gg.octave.bot.commands.general
 
+import gg.octave.bot.utils.OctaveBot
 import kotlinx.coroutines.future.await
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
@@ -67,7 +68,7 @@ class General : Cog {
         ctx.send {
             setColor(0x9570D3)
             setTitle("Support Server")
-            setDescription("[Join our support server by clicking here!](https://discord.gg/musicbot)")
+            setDescription("[Join our support server by clicking here!](${OctaveBot.DISCORD_INVITE_LINK})")
         }
     }
 

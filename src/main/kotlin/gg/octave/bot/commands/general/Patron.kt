@@ -27,6 +27,7 @@ package gg.octave.bot.commands.general
 import gg.octave.bot.Launcher
 import gg.octave.bot.db.premium.PremiumGuild
 import gg.octave.bot.db.premium.PremiumUser
+import gg.octave.bot.utils.OctaveBot
 import gg.octave.bot.utils.extensions.DEFAULT_SUBCOMMAND
 import gg.octave.bot.utils.extensions.db
 import gg.octave.bot.utils.extensions.shardManager
@@ -88,7 +89,7 @@ class Patron : Cog {
                         setDescription(
                             "Couldn't find your pledge.\n" +
                                 "[Re-link your account](https://support.patreon.com/hc/en-us/articles/212052266-Get-my-Discord-role) and try again.\n" +
-                                "If this still doesn't work, [join the Discord server](https://discord.gg/musicbot) for support."
+                                "If this still doesn't work, [join the Discord server](${OctaveBot.DISCORD_INVITE_LINK}) for support."
                         )
                     }
 

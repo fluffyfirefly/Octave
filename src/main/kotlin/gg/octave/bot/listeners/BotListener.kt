@@ -26,6 +26,7 @@ package gg.octave.bot.listeners
 
 import gg.octave.bot.Launcher
 import gg.octave.bot.db.OptionsRegistry
+import gg.octave.bot.utils.OctaveBot
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.events.*
@@ -83,7 +84,7 @@ class BotListener : EventListener {
             .setDescription("Welcome to Octave! The highest quality Discord music bot!\n" +
                 "Please check the links below to get help, and use `${prefix}help` to get started!")
             .addField("Important Links",
-                "[Support Server](https://discord.gg/musicbot)\n" +
+                "[Support Server](${OctaveBot.DISCORD_INVITE_LINK})\n" +
                     "[Website](https://octave.gg) \n" +
                     "[Invite Link](https://invite.octave.gg)\n" +
                     "[Patreon](https://patreon.com/octave)", true)

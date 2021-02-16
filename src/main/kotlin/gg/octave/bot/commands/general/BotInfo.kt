@@ -24,7 +24,9 @@
 
 package gg.octave.bot.commands.general
 
+import com.github.natanbc.lavadsp.DspInfo
 import com.jagrosh.jdautilities.paginator
+import com.sedmelluq.discord.lavaplayer.tools.PlayerLibrary
 import com.sun.management.OperatingSystemMXBean
 import gg.octave.bot.Launcher
 import gg.octave.bot.utils.Capacity
@@ -32,6 +34,7 @@ import gg.octave.bot.utils.OctaveBot
 import gg.octave.bot.utils.Utils
 import gg.octave.bot.utils.extensions.config
 import gg.octave.bot.utils.extensions.selfMember
+import gg.octave.bot.utils.getDisplayValue
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 import me.devoxin.flight.api.annotations.SubCommand
@@ -47,12 +50,7 @@ class BotInfo : Cog {
     @Command(aliases = ["about", "info", "stats"], description = "Show information about the bot.")
     fun botinfo(ctx: Context) {
         val commandSize = ctx.commandClient.commands.size
-
-        // Uptime
-        val s = ManagementFactory.getRuntimeMXBean().uptime / 1000
-        val m = s / 60
-        val h = m / 60
-        val d = h / 24
+        val formattedUptime = getDisplayValue(ManagementFactory.getRuntimeMXBean().uptime, true)
 
         val osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
         val procCpuUsage = dpFormatter.format(osBean.processCpuLoad * 100)
@@ -69,14 +67,14 @@ class BotInfo : Cog {
         Launcher.database.jedisPool.resource.use {
             val stats = it.hgetAll("stats")
             for (shard in stats) {
-                val jsonStats = JSONObject(shard.value);
+                val jsonStats = JSONObject(shard.value)
                 guilds += jsonStats.getLong("guild_count")
                 users += jsonStats.getLong("cached_users")
             }
 
             val nodeStats = it.hgetAll("node-stats")
             for (node in nodeStats) {
-                val jsonStats = JSONObject(node.value);
+                val jsonStats = JSONObject(node.value)
                 musicPlayers += jsonStats.getLong("music_players")
                 totalMemory += jsonStats.getLong("used_ram")
                 totalNodes++
@@ -94,20 +92,25 @@ class BotInfo : Cog {
                 "a simple and easy to use Discord music bot delivering high quality audio to hundreds of thousands of servers." +
                 " We support Youtube, Soundcloud, and more!")
 
+            addField("Uptime", formattedUptime, true)
             addField("CPU Usage", "${procCpuUsage}% JVM\n${sysCpuUsage}% SYS", true)
             addField("RAM Usage", "$ramUsedFormatted${ramUsedCalculated.unit}\nAll: $totalRamFormatted${totalRamCalculated.unit}", true)
+
             addField("Guilds", guilds.toString(), true)
             addField("Voice Connections", musicPlayers.toString(), true)
-
             addField("Cached Users", users.toString(), true)
-            addField("Uptime", "${d}d ${h % 24}h ${m % 60}m ${s % 60}s", true)
 
-            val general = buildString {
-                append("Premium: **[Patreon](https://www.patreon.com/octavebot)**\n")
-                append("Commands: **$commandSize**\n")
-                append("Library: **[JDA ${JDAInfo.VERSION}](${JDAInfo.GITHUB})**\n")
+            val resources = buildString {
+                append("**[Website](https://octave.gg)** | ")
+                append("**[Discord](${OctaveBot.DISCORD_INVITE_LINK})** | ")
+                append("**[Premium](https://patreon.com/octavebot)**\n\n")
+
+                append("**[JDA ${JDAInfo.VERSION}](${JDAInfo.GITHUB})** | ")
+                append("**[Lavaplayer ${PlayerLibrary.VERSION}](https://github.com/sedmelluq/lavaplayer)** | ")
+                append("**[LavaDSP ${DspInfo.VERSION}](https://github.com/natanbc/lavadsp)**")
             }
-            addField("General", general, true)
+
+            addField("Resources", resources, false)
             setFooter("${Thread.activeCount()} threads | Current Shard: ${ctx.jda.shardInfo.shardId} | Current Node: ${ctx.config.nodeNumber + 1} / $totalNodes")
         }
     }

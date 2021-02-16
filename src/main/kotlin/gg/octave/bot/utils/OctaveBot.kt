@@ -32,4 +32,6 @@ object OctaveBot {
 
     val VERSION_STRING = versionTxt[0]
     val GIT_REVISION = versionTxt[1]
+
+    const val DISCORD_INVITE_LINK = "https://discord.gg/musicbot"
 }
