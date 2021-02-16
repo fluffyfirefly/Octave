@@ -47,7 +47,6 @@ class PlayerStats : Cog {
             it.guild?.audioManager?.connectedChannel?.members?.none { m -> !m.user.isBot } ?: false
         }
         val bySource = players.mapNotNull { it.player.playingTrack?.sourceManager?.sourceName }.groupingBy { it }.eachCount()
-        //val bySource = sources.associateBy({ it }, { players.count { m -> isSource(it, m) } })
         val bySourceFormatted = bySource.map { "• ${it.key.capitalize()}: **${it.value}**" }.joinToString("\n")
 
         ctx.send {

@@ -202,7 +202,7 @@ class PlaylistManager(
                     playlist.isExposed = arg == "public"
                     renderPage()
                 }
-
+                ctx.message.addReaction("👌").queue()
                 true
             }
             "resend" -> {
@@ -218,6 +218,7 @@ class PlaylistManager(
                     playlist.name = newName
                     renderPage()
                 }
+                ctx.message.addReaction("👌").queue()
                 true
             }
             "save" -> {
