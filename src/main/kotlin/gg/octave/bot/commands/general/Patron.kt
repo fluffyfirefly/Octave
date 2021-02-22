@@ -28,9 +28,7 @@ import gg.octave.bot.Launcher
 import gg.octave.bot.db.premium.PremiumGuild
 import gg.octave.bot.db.premium.PremiumUser
 import gg.octave.bot.utils.OctaveBot
-import gg.octave.bot.utils.extensions.DEFAULT_SUBCOMMAND
-import gg.octave.bot.utils.extensions.db
-import gg.octave.bot.utils.extensions.shardManager
+import gg.octave.bot.utils.extensions.*
 import io.sentry.Sentry
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
@@ -130,10 +128,11 @@ class Patron : Cog {
     @SubCommand(description = "Manage your premium servers.")
     fun servers(ctx: Context, @Greedy action: String?) {
         val remainingServers = ctx.db.getPremiumUser(ctx.author.id).remainingPremiumGuildQuota
+        val (optAction, rest) = action?.split(" +".toRegex()).sectionOrNull()
 
-        when (action?.toLowerCase()) {
+        when (optAction?.toLowerCase()) {
             "add" -> serversAdd(ctx)
-            "remove" -> serversRemove(ctx, action.split(" +".toRegex()).drop(1))
+            "remove" -> serversRemove(ctx, rest)
             else -> {
                 val premGuilds = ctx.db.getPremiumGuilds(ctx.author.id)?.toList()
                     ?: emptyList()
@@ -201,8 +200,8 @@ class Patron : Cog {
             }
     }
 
-    fun serversRemove(ctx: Context, args: List<String>) {
-        if (args.isNotEmpty() && args[0].toLongOrNull() == null) {
+    fun serversRemove(ctx: Context, args: List<String>?) {
+        if (args != null && args.isNotEmpty() && args[0].toLongOrNull() == null) {
             return ctx.send(
                 "Invalid server ID provided. You can omit the server ID to remove the current server.\n" +
                     "Alternatively, you can list your premium servers with `${ctx.trigger}patron servers`, " +
@@ -210,7 +209,7 @@ class Patron : Cog {
             )
         }
 
-        val guildId = args.firstOrNull() ?: ctx.guild!!.id
+        val guildId = args?.firstOrNull() ?: ctx.guild!!.id
         val guild = ctx.shardManager.getGuildById(guildId)?.name ?: "Unknown Server"
         val hasDevOverride = ctx.commandClient.ownerIds.contains(ctx.author.idLong)
 
