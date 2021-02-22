@@ -154,8 +154,8 @@ class PlaylistManager(
                         setColor(0x9571D3)
                         setTitle("Editing ${playlist.name} | ${ctx.author.name}'s playlist")
                         setDescription(
-                            "This editor has timed out. Any pending changes have been automatically saved\n" +
-                                "If you hadn't finished editing, you can send `${ctx.trigger}playlist edit ${playlist.name}` to" +
+                            "This editor has timed out. Any pending changes have been automatically saved.\n" +
+                                "If you haven't finished editing, you can send `${ctx.trigger}playlist edit ${playlist.name}` to " +
                                 "start a new editor."
                         )
                     }.build()).queue()
