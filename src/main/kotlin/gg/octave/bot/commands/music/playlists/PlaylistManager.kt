@@ -140,9 +140,7 @@ class PlaylistManager(
         val response = ctx.commandClient.waitFor(defaultPredicate, 20000)
 
         response.thenAccept {
-            val wait = handle(it.message)
-
-            if (wait) {
+            if (handle(it.message)) {
                 waitForInput()
             }
         }.exceptionally {
@@ -150,15 +148,28 @@ class PlaylistManager(
             playlist.setTracks(tracks)
             playlist.save()
 
-            if (exc !is TimeoutException) {
-                Sentry.capture(it)
-                ctx.send {
-                    setColor(0x9571D3)
-                    setTitle("Error in Playlist Management")
-                    setDescription(
-                        "An unknown error occurred, we apologise for any inconvenience caused.\n" +
-                            "Any modifications made to your playlist have been saved."
-                    )
+            when (exc) {
+                is TimeoutException -> {
+                    msg.editMessage(EmbedBuilder().apply {
+                        setColor(0x9571D3)
+                        setTitle("Editing ${playlist.name} | ${ctx.author.name}'s playlist")
+                        setDescription(
+                            "This editor has timed out. Any pending changes have been automatically saved\n" +
+                                "If you hadn't finished editing, you can send `${ctx.trigger}playlist edit ${playlist.name}` to" +
+                                "start a new editor."
+                        )
+                    }.build()).queue()
+                }
+                else -> {
+                    Sentry.capture(it)
+                    ctx.send {
+                        setColor(0x9571D3)
+                        setTitle("Error in Playlist Management")
+                        setDescription(
+                            "An unknown error occurred, we apologise for any inconvenience caused.\n" +
+                                "Any modifications made to your playlist have been saved."
+                        )
+                    }
                 }
             }
 
