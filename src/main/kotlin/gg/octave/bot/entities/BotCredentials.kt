@@ -24,6 +24,7 @@
 
 package gg.octave.bot.entities
 
+import gg.octave.bot.Launcher
 import gg.octave.bot.utils.get
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader
 import java.io.File
@@ -36,11 +37,18 @@ class BotCredentials(file: File) {
     val token = config["token"].string.takeIf { !it.isNullOrBlank() }
         ?: error("Bot token can't be null or blank.")
 
-    val totalShards = config["sharding", "total"].int.takeIf { it > 0 }
+    val totalShards = System.getProperty("shardCount").toInt()
+    private val totalNodes = Launcher.configuration.nodeTotal
+    private val shardsPerInstance = totalShards / totalNodes
+
+    val shardStart = Launcher.configuration.nodeNumber * shardsPerInstance
+    val shardEnd = shardStart + shardsPerInstance
+
+    //val totalShards = config["sharding", "total"].int.takeIf { it > 0 }
         ?: error("Shard count total needs to be > 0")
-    val shardStart = config["sharding", "start"].int.takeIf { it >= 0 }
+    //val shardStart = config["sharding", "start"].int.takeIf { it >= 0 }
         ?: error("Shard start needs to be >= 0")
-    val shardEnd = config["sharding", "end"].int.takeIf { it in shardStart..totalShards }
+    //val shardEnd = config["sharding", "end"].int.takeIf { it in shardStart..totalShards }
         ?: error("Shard end needs to be <= sharding.total")
 
     val webHookURL: String? = config["webhook url"].string
@@ -68,8 +76,8 @@ class BotCredentials(file: File) {
     /* Rethink */
     val rethinkHost: String = config["rethink", "host"].string ?: "localhost"
     val rethinkPort: Int = config["rethink", "port"].getInt(28015)
-    val rethinkUsername: String? = config["rethink", "username"].string ?: "admin"
-    val rethinkAuth: String? = config["rethink", "auth"].string ?: ""
+    val rethinkUsername: String = config["rethink", "username"].string ?: "admin"
+    val rethinkAuth: String = config["rethink", "auth"].string ?: ""
 
     /* Redis */
     val redisHost: String = config["redis", "host"].string ?: "localhost"
