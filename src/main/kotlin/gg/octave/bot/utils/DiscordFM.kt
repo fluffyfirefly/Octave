@@ -37,7 +37,7 @@ class DiscordFM {
         val dfmFolder = cls.getResource("/dfm/")?.toURI()
             ?: throw NullPointerException("DiscordFM resources folder does not exist within jar!")
 
-        val dfmPlaylists = File(dfmFolder).list()!!
+        val dfmPlaylists = File(dfmFolder).list()!!.map { it.dropLast(4) }
         cache = HashMap(dfmPlaylists.size)
 
         for (playlist in dfmPlaylists) {
