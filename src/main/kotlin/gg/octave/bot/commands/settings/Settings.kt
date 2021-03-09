@@ -101,8 +101,6 @@ class Settings : Cog {
             addField("Designated Music VC", musicChannels, false)
             addField("Ignoring", "Use `${ctx.trigger}ignore list` to view ignored entities.", false)
         }
-
-        // TODO: fill in song length/queue limit values
     }
 
     @SubCommand(description = "Resets the settings for the guild.")

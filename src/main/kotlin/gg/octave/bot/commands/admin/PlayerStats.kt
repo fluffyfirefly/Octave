@@ -26,7 +26,6 @@ package gg.octave.bot.commands.admin
 
 import gg.octave.bot.Launcher
 import gg.octave.bot.music.MusicManagerV2
-import gg.octave.bot.music.settings.BoostSetting
 import me.devoxin.flight.api.Context
 import me.devoxin.flight.api.annotations.Command
 import me.devoxin.flight.api.entities.Cog

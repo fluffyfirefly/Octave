@@ -16,7 +16,6 @@ import me.devoxin.flight.api.annotations.Tentative
 import me.devoxin.flight.api.entities.Cog
 import net.dv8tion.jda.api.EmbedBuilder
 import java.net.URL
-import java.util.function.Consumer
 
 class Playlists : Cog {
     @Command(aliases = ["pl", "cpl"], description = "Manage your custom playlists.")
