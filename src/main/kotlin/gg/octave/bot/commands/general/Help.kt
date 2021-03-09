@@ -96,16 +96,16 @@ class Help : Cog {
     @ExperimentalStdlibApi
     fun sendCommandHelp(ctx: Context, command: CommandFunction, subcomms: Set<SubCommandFunction>?) {
         val description = buildString {
-            appendln(command.properties.description)
-            appendln()
+            appendLine(command.properties.description)
+            appendLine()
 
             val triggerList = listOf(command.name, *command.properties.aliases)
-            appendln("**Triggers:** ${triggerList.joinToString(", ")}")
+            appendLine("**Triggers:** ${triggerList.joinToString(", ")}")
             append("**Usage:** `${ctx.trigger}${command.name}")
             if (command.arguments.isNotEmpty()) {
-                appendln(" ${command.arguments.joinToString(" ") { it.format(false) }}`")
+                appendLine(" ${command.arguments.joinToString(" ") { it.format(false) }}`")
             } else {
-                appendln("`")
+                appendLine("`")
             }
         }
 
@@ -114,7 +114,7 @@ class Help : Cog {
             setTitle("Help | ${command.name}")
             setDescription(description)
 
-            val padEnd = command.subcommands.values.maxBy { it.name.length }?.name?.length ?: 15
+            val padEnd = command.subcommands.values.maxByOrNull { it.name.length }?.name?.length ?: 15
             val subcommands = (subcomms ?: command.subcommands.values.toSet()).joinToString("\n") {
                 "`${it.name.padEnd(padEnd, ' ')}:` ${it.properties.description}"
             }.takeIf { it.isNotEmpty() } ?: "*None.*"
@@ -133,10 +133,10 @@ class Help : Cog {
     @ExperimentalStdlibApi
     fun sendSubCommandHelp(ctx: Context, subcommand: SubCommandFunction, parent: CommandFunction) {
         val description = buildString {
-            appendln(subcommand.properties.description)
-            appendln()
-            appendln("**Triggers:** ${subcommand.properties.aliases.joinToString(", ")}")
-            appendln("**Usage:** `${ctx.trigger}${parent.name} ${subcommand.name}`")
+            appendLine(subcommand.properties.description)
+            appendLine()
+            appendLine("**Triggers:** ${subcommand.properties.aliases.joinToString(", ")}")
+            appendLine("**Usage:** `${ctx.trigger}${parent.name} ${subcommand.name}`")
         }
 
         val syntax = buildString {

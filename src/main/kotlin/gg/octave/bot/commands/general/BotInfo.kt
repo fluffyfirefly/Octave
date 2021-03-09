@@ -49,7 +49,6 @@ class BotInfo : Cog {
 
     @Command(aliases = ["about", "info", "stats"], description = "Show information about the bot.")
     fun botinfo(ctx: Context) {
-        val commandSize = ctx.commandClient.commands.size
         val formattedUptime = getDisplayValue(ManagementFactory.getRuntimeMXBean().uptime, true)
 
         val osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)

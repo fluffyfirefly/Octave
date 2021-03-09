@@ -26,30 +26,24 @@ package gg.octave.bot.utils
 
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
 
 class DiscordFM {
-    fun getRandomSong(library: String): String? {
-        return cache[library]?.random()?.trim { it <= ' ' }
-        //?: "https://www.youtube.com/watch?v=D7npse9n-Yw"
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(DiscordFM::class.java)
-        val LIBRARIES = arrayOf(
-            "chill corner", "christmas", "classical", "coffee house jazz",
-            "country countdown", "electro hub", "electro swing", "funk",
-            "halloween", "hip hop", "japanese lounge", "korean madness",
-            "metal mix", "purely pop", "retro renegade", "rock n roll"
-        )
-        private val cache = HashMap<String, List<String>>(LIBRARIES.size)
-    }
+    private val cache: HashMap<String, List<String>>
 
     init {
-        for (lib in LIBRARIES) {
-            DiscordFM::class.java.getResourceAsStream("/dfm/$lib.txt").use {
+        val cls = this::class.java
+        val dfmFolder = cls.getResource("/dfm/")?.toURI()
+            ?: throw NullPointerException("DiscordFM resources folder does not exist within jar!")
+
+        val dfmPlaylists = File(dfmFolder).list()!!
+        cache = HashMap(dfmPlaylists.size)
+
+        for (playlist in dfmPlaylists) {
+            cls.getResourceAsStream("/dfm/$playlist.txt").use {
                 if (it == null) {
-                    return@use log.warn("Playlist {} does not exist, skipping...", lib)
+                    return@use log.warn("Playlist {} does not exist, skipping...", playlist)
                 }
 
                 try {
@@ -58,12 +52,28 @@ class DiscordFM {
                         .map { s -> s.split(' ')[0] }
                         .filter { s -> s.startsWith("https://") }
 
-                    cache[lib] = collect
-                    log.info("Added {} tracks from playlist {}", collect.size, lib)
+                    cache[playlist] = collect
+                    log.info("Added {} tracks from playlist {}", collect.size, playlist)
                 } catch (e: IOException) {
-                    log.error("Failed to load playlist {}", lib, e)
+                    log.error("Failed to load playlist {}", playlist, e)
                 }
             }
         }
+    }
+
+    fun libraries() = cache.keys.toSet()
+
+    fun getRandomSong(library: String): String? {
+        return cache[library]?.random()?.trim { it <= ' ' } //?: "https://www.youtube.com/watch?v=D7npse9n-Yw"
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(DiscordFM::class.java)
+        /*val LIBRARIES = arrayOf(
+            "chill corner", "christmas", "classical", "coffee house jazz",
+            "country countdown", "electro hub", "electro swing", "funk",
+            "halloween", "hip hop", "japanese lounge", "korean madness",
+            "metal mix", "purely pop", "retro renegade", "rock n roll"
+        )*/
     }
 }

@@ -84,13 +84,13 @@ class Selector(
                 Type.MESSAGE -> { /* pass */
                 }
             }
-            waitFor()
+            waitForEvent()
         }, {
             finally(message)
         })
     }
 
-    private fun waitFor() {
+    private fun waitForEvent() {
         when (type) {
             Type.REACTIONS -> {
                 waiter.waitFor(MessageReactionAddEvent::class.java) {

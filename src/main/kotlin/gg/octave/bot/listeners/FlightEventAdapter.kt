@@ -113,7 +113,7 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
             BucketType.GLOBAL -> -1
         }
 
-        val currentCooldown = Launcher.ratelimiter.getCooldown(entityId, commandCooldown.bucket, command)
+        val currentCooldown = Launcher.commandRatelimiter.getCooldown(entityId, commandCooldown.bucket, command)
             ?: return
 
         if (cooldown < 1000) {
@@ -201,7 +201,7 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
     }
 
     override fun onCommandPostInvoke(ctx: Context, command: CommandFunction, failed: Boolean) {
-        Launcher.datadog.incrementCounter("bot.commands_ran")
+        //Launcher.datadog.incrementCounter("bot.commands_ran")
     }
 
     override fun onBotMissingPermissions(ctx: Context, command: CommandFunction, permissions: List<Permission>) {
@@ -257,7 +257,7 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
                 }
 
                 if (moreRoles.isNotEmpty()) {
-                    appendln(", or any of the following roles:")
+                    appendLine(", or any of the following roles:")
                     append(moreRoles)
                 }
             }

@@ -44,12 +44,12 @@ class BotCredentials(file: File) {
     val shardStart = Launcher.configuration.nodeNumber * shardsPerInstance
     val shardEnd = shardStart + shardsPerInstance
 
-    //val totalShards = config["sharding", "total"].int.takeIf { it > 0 }
+    /*val totalShards = config["sharding", "total"].int.takeIf { it > 0 }
         ?: error("Shard count total needs to be > 0")
     //val shardStart = config["sharding", "start"].int.takeIf { it >= 0 }
         ?: error("Shard start needs to be >= 0")
-    //val shardEnd = config["sharding", "end"].int.takeIf { it in shardStart..totalShards }
-        ?: error("Shard end needs to be <= sharding.total")
+    val shardEnd = config["sharding", "end"].int.takeIf { it in shardStart..totalShards }
+        ?: error("Shard end needs to be <= sharding.total")*/
 
     val webHookURL: String? = config["webhook url"].string
 

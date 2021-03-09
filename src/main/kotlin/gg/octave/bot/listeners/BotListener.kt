@@ -92,19 +92,19 @@ class BotListener : EventListener {
 
         channel.sendMessage(embedBuilder.build()).queue { it.delete().queueAfter(1, TimeUnit.MINUTES) }
 
-        Launcher.datadog.gauge("octave_bot.guilds", Launcher.shardManager.guildCache.size())
-        Launcher.datadog.gauge("octave_bot.users", Launcher.shardManager.userCache.size())
-        Launcher.datadog.gauge("octave_bot.players", Launcher.players.size().toLong())
-        Launcher.datadog.incrementCounter("octave_bot.guildJoin")
+        //Launcher.datadog.gauge("octave_bot.guilds", Launcher.shardManager.guildCache.size())
+        //Launcher.datadog.gauge("octave_bot.users", Launcher.shardManager.userCache.size())
+        //Launcher.datadog.gauge("octave_bot.players", Launcher.players.size().toLong())
+        //Launcher.datadog.incrementCounter("octave_bot.guildJoin")
         postStats(event.jda)
     }
 
     private fun onGuildLeave(event: GuildLeaveEvent) {
         Launcher.players.destroy(event.guild)
-        Launcher.datadog.gauge("octave_bot.guilds", Launcher.shardManager.guildCache.size())
-        Launcher.datadog.gauge("octave_bot.users", Launcher.shardManager.userCache.size())
-        Launcher.datadog.gauge("octave_bot.players", Launcher.players.size().toLong())
-        Launcher.datadog.incrementCounter("octave_bot.guildLeave")
+        //Launcher.datadog.gauge("octave_bot.guilds", Launcher.shardManager.guildCache.size())
+        //Launcher.datadog.gauge("octave_bot.users", Launcher.shardManager.userCache.size())
+        //Launcher.datadog.gauge("octave_bot.players", Launcher.players.size().toLong())
+        //Launcher.datadog.incrementCounter("octave_bot.guildLeave")
         postStats(event.jda)
     }
 
@@ -117,25 +117,25 @@ class BotListener : EventListener {
     }
 
     private fun onReady(event: ReadyEvent) {
-        Launcher.datadog.incrementCounter("octave_bot.shardReady")
+        //Launcher.datadog.incrementCounter("octave_bot.shardReady")
         log.info("JDA ${event.jda.shardInfo.shardId} is ready.")
         postStats(event.jda)
     }
 
     private fun onResume(event: ResumedEvent) {
-        Launcher.datadog.incrementCounter("octave_bot.shardResume")
+        //Launcher.datadog.incrementCounter("octave_bot.shardResume")
         log.info("JDA ${event.jda.shardInfo.shardId} has resumed.")
         postStats(event.jda)
     }
 
     private fun onReconnect(event: ReconnectedEvent) {
-        Launcher.datadog.incrementCounter("octave_bot.shardReconnect")
+        //Launcher.datadog.incrementCounter("octave_bot.shardReconnect")
         log.info("JDA ${event.jda.shardInfo.shardId} has reconnected.")
         postStats(event.jda)
     }
 
     private fun onDisconnect(event: DisconnectEvent) {
-        Launcher.datadog.incrementCounter("octave_bot.shardDisconnect")
+        //Launcher.datadog.incrementCounter("octave_bot.shardDisconnect")
 
         if (event.isClosedByServer) {
             log.info("JDA {} disconnected (closed by server). Code: {} {}",
@@ -148,7 +148,7 @@ class BotListener : EventListener {
     }
 
     private fun onException(event: ExceptionEvent) {
-        Launcher.datadog.incrementCounter("octave_bot.exception")
+        //Launcher.datadog.incrementCounter("octave_bot.exception")
         if (!event.isLogged)
             log.error("Exception in JDA {}", event.jda.shardInfo.shardId, event.cause)
     }

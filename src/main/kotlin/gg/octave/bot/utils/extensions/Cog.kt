@@ -35,7 +35,7 @@ fun Cog.DEFAULT_SUBCOMMAND(ctx: Context) {
 
     val command = ctx.invokedCommand as CommandFunction
     val subcommands = command.subcommands.values.toSet()
-    val longestName = subcommands.maxBy { it.name.length }?.name?.length ?: 15
+    val longestName = subcommands.maxByOrNull { it.name.length }?.name?.length ?: 15
     val commandList = subcommands.sortedBy { it.name }
         .joinToString("\n") { "`${it.name.padEnd(longestName)}:` ${it.properties.description}" }
 

@@ -56,11 +56,11 @@ class PatreonUser(
             val discordId = connections.optJSONObject("discord")
                 ?.getLong("user_id")
 
-            val tierId = pledgeObj.getJSONObject("relationships")
-                ?.optJSONObject("reward")
-                ?.optJSONObject("data")
-                ?.optInt("id")
-                ?: 0
+            //val tierId = pledgeObj.getJSONObject("relationships")
+            //    ?.optJSONObject("reward")
+            //    ?.optJSONObject("data")
+            //    ?.optInt("id")
+            //    ?: 0
 
             return PatreonUser(
                 userObj.getInt("id"),

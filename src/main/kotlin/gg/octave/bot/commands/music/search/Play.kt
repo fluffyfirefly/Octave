@@ -254,10 +254,10 @@ class Play : Cog {
                         setDescription(
                             buildString {
                                 if (votes > halfPeople) {
-                                    appendln("The vote has passed! The song will be queued.")
+                                    appendLine("The vote has passed! The song will be queued.")
                                     play(ctx, args, isSearchResult, uri, isNext)
                                 } else {
-                                    appendln("The vote has failed! The song will not be queued.")
+                                    appendLine("The vote has failed! The song will not be queued.")
                                 }
                             }
                         )

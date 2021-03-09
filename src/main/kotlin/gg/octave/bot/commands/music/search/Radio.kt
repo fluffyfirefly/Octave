@@ -41,7 +41,8 @@ import me.devoxin.flight.api.entities.Cog
 import org.apache.commons.lang3.StringUtils
 
 class Radio : Cog {
-    private val stations = DiscordFM.LIBRARIES.joinToString("\n") { "• `${it.capitalize()}`" }
+    private val stationsList = Launcher.discordFm.libraries()
+    private val stations = stationsList.joinToString("\n") { "• `${it.capitalize()}`" }
 
     @Command(description = "Stream random songs from some radio stations.")
     fun radio(ctx: Context) = DEFAULT_SUBCOMMAND(ctx)
@@ -53,8 +54,8 @@ class Radio : Cog {
                 setColor(0x9570D3)
                 setDescription(
                     buildString {
-                        appendln("Stream random songs from radio stations!")
-                        appendln("Select and stream a station using `${ctx.trigger}radio <station name>`.")
+                        appendLine("Stream random songs from radio stations!")
+                        appendLine("Select and stream a station using `${ctx.trigger}radio <station name>`.")
                         append("Stop streaming songs from a station with `${ctx.trigger}radio stop`,")
                     }
                 )
@@ -65,9 +66,9 @@ class Radio : Cog {
         val query = station.toLowerCase()
         // quick check for incomplete query
         // classic -> classical
-        val library = DiscordFM.LIBRARIES.firstOrNull { it.contains(query) }
-            ?: DiscordFM.LIBRARIES.minBy { StringUtils.getLevenshteinDistance(it, query) }
-            ?: return ctx.send("Library $query doesn't exist. Available stations: `${DiscordFM.LIBRARIES.contentToString()}`.")
+        val library = stationsList.firstOrNull { it.contains(query) }
+            ?: stationsList.minByOrNull { StringUtils.getLevenshteinDistance(it, query) }
+            ?: return ctx.send("Library $query doesn't exist. Available stations: `$stations`.")
 
         val manager = Launcher.players.get(ctx.guild)
 

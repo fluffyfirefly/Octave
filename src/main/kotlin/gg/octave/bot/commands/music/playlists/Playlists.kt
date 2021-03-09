@@ -151,17 +151,17 @@ class Playlists : Cog {
         }
 
         val loader = FunctionalResultHandler(
-            Consumer { ctx.send("This is not a playlist.") },
-            Consumer {
+            { ctx.send("This is not a playlist.") },
+            {
                 val importName = name
                     ?: it.name
-                    ?: return@Consumer ctx.send("The playlist does not have a name. You need to specify one instead.")
+                    ?: return@FunctionalResultHandler ctx.send("The playlist does not have a name. You need to specify one instead.")
                 // Last bit shouldn't happen but better safe than sorry.
 
                 val existing = ctx.db.getCustomPlaylist(ctx.author.id, importName)
 
                 if (existing != null) {
-                    return@Consumer ctx.send("A playlist with that name already exists. Specify a different one.")
+                    return@FunctionalResultHandler ctx.send("A playlist with that name already exists. Specify a different one.")
                     // Maybe we could append tracks to a playlist here? TODO, or, INVESTIGATE
                 }
 
@@ -175,8 +175,8 @@ class Playlists : Cog {
                     setDescription("The playlist `${it.name}` has been imported as `$importName` successfully!")
                 }
             },
-            Runnable { ctx.send("The URL doesn't lead to a valid playlist.") },
-            Consumer { ctx.send("Failed to load the media resource.\n`${it.localizedMessage}`") }
+            { ctx.send("The URL doesn't lead to a valid playlist.") },
+            { ctx.send("Failed to load the media resource.\n`${it.localizedMessage}`") }
         )
 
         Launcher.players.playerManager.loadItem(url.toString(), loader)
@@ -248,19 +248,13 @@ class Playlists : Cog {
             }
         }
 
-        var existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
-
-        if (existingPlaylist == null && name.length == 5) {
-            existingPlaylist = ctx.db.getCustomPlaylistById(name)
-        }
-
-        if (existingPlaylist == null) {
-            return ctx.send {
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
+            ?: name.takeIf { it.length == 5 }?.let(ctx.db::getCustomPlaylistById)
+            ?: return ctx.send {
                 setColor(0x9571D3)
                 setTitle("Unknown Playlist")
                 setDescription("There were no playlists found with that name/ID.")
             }
-        }
 
         if (!existingPlaylist.isExposed && existingPlaylist.author != ctx.author.id) {
             return ctx.send {

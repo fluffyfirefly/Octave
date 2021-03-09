@@ -48,7 +48,7 @@ class Keys : Cog {
         val keys = buildString {
             (0 until quantity)
                 .map { PremiumKey(UUID.randomUUID().toString(), type, keyDuration).apply { save() }.id }
-                .forEach { appendln(it) }
+                .forEach(::appendLine)
         }
 
         ctx.sendPrivate(keys)
@@ -61,18 +61,18 @@ class Keys : Cog {
 
         val result = buildString {
             for (id in ids) {
-                appendln("**Key** `$id`")
+                appendLine("**Key** `$id`")
                 val key = ctx.db.getPremiumKey(id)
 
                 if (key == null) {
-                    appendln(" NOT FOUND\n")
+                    appendLine(" NOT FOUND\n")
                     continue
                 }
 
                 val redeemer = key.redeemer
 
                 if (redeemer == null) {
-                    appendln(" Not redeemed")
+                    appendLine(" Not redeemed")
                 } else {
                     when (redeemer.type) {
                         Redeemer.Type.GUILD -> {
@@ -81,17 +81,17 @@ class Keys : Cog {
                             if (guildData != null) {
                                 guildData.premiumKeys.remove(key.id)
                                 guildData.save()
-                                appendln(" Revoked the key from guild ID `${guildData.id}`.")
+                                appendLine(" Revoked the key from guild ID `${guildData.id}`.")
                             } else {
-                                appendln(" Guild ID `${redeemer.id}` redeemed the key but no longer exists in the DB.")
+                                appendLine(" Guild ID `${redeemer.id}` redeemed the key but no longer exists in the DB.")
                             }
                         }
-                        else -> appendln(" Unknown redeemer type")
+                        else -> appendLine(" Unknown redeemer type")
                     }
                 }
 
                 key.delete()
-                appendln(" Deleted from database.\n")
+                appendLine(" Deleted from database.\n")
             }
         }
 

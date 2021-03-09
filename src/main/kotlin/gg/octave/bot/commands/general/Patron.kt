@@ -138,19 +138,19 @@ class Patron : Cog {
                     ?: emptyList()
 
                 val output = buildString {
-                    appendln("`${ctx.trigger}patron servers <add/remove>`")
-                    appendln("```")
-                    appendln("%-20s | %-21s | %-5s".format("Server Name", "Server ID", "Added"))
+                    appendLine("`${ctx.trigger}patron servers <add/remove>`")
+                    appendLine("```")
+                    appendLine("%-20s | %-21s | %-5s".format("Server Name", "Server ID", "Added"))
 
                     for (g in premGuilds) {
                         val guildName = ctx.shardManager.getGuildById(g.id)?.let { truncate(it.name) }
                             ?: "Unknown Server"
                         val guildId = g.id
                         val guildAdded = g.daysSinceAdded
-                        appendln("%-20s | %-21s | %d days ago".format(guildName, guildId, guildAdded))
+                        appendLine("%-20s | %-21s | %d days ago".format(guildName, guildId, guildAdded))
                     }
 
-                    appendln()
+                    appendLine()
                     append("You can have ${max(remainingServers, 0)} more premium server${plural(remainingServers)}.")
                     append("```")
                 }

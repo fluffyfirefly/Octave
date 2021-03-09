@@ -34,11 +34,7 @@ import org.json.JSONObject
 class ShardInfo : Cog {
     @Command(aliases = ["shards", "shard"], description = "View shard information.", developerOnly = true)
     suspend fun shardinfo(ctx: Context) {
-        var stats: Map<String, String> = HashMap()
-        Launcher.database.jedisPool.resource.use {
-            stats = it.hgetAll("stats")
-        }
-
+        val stats: Map<String, String> = Launcher.database.jedisPool.resource.use { it.hgetAll("stats") }
         val status = stats.entries.sortedBy { it.key.toInt() }
             .joinToString("\n") { formatInfo(it.key.toInt(), stats.size, JSONObject(it.value)) }
         val pages = TextSplitter.split(status, 1920)
