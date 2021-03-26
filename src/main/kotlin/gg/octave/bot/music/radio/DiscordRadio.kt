@@ -37,15 +37,15 @@ class DiscordRadio(override val name: String) : RadioSource {
 
             override fun playlistLoaded(playlist: AudioPlaylist) = trackLoaded(playlist.tracks.first())
 
-            override fun noMatches() {
-                future.complete(null)
-            }
+            override fun noMatches() = retryLoad()
+            override fun loadFailed(exception: FriendlyException) = retryLoad()
 
-            override fun loadFailed(exception: FriendlyException) {
+            private fun retryLoad() {
                 if (attempts >= 3) {
                     future.complete(null)
                 } else {
                     nextTrack0(context, attempts + 1)
+                        .thenAccept(future::complete)
                 }
             }
         })
