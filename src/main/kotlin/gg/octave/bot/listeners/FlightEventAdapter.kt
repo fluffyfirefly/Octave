@@ -179,10 +179,12 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
             if (data.music.channels.isNotEmpty() && ctx.member!!.voiceState?.channel?.id !in data.music.channels) {
                 val channels = data.music.channels
                     .mapNotNull { ctx.guild!!.getVoiceChannelById(it)?.name }
-                    .joinToString(", ")
 
-                ctx.send("Music can only be played in: `$channels`, since this server has set it/them as a designated voice channel.")
-                return false
+                if (channels.isNotEmpty()) {
+                    ctx.send("Music can only be played in: `${channels.joinToString(", ")}`, " +
+                        "since this server has set it/them as a designated voice channel.")
+                    return false
+                }
             }
         }
 
