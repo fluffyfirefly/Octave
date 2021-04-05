@@ -26,18 +26,20 @@ package gg.octave.bot.utils
 
 import org.apache.commons.io.IOUtils
 import org.slf4j.LoggerFactory
+import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
+import java.io.InputStreamReader
 
 class DiscordFM {
     private val cache: HashMap<String, List<String>>
 
     init {
         val cls = this::class.java
-        val dfmFolder = cls.getResource("/dfm/")?.toURI()
-            ?: throw NullPointerException("DiscordFM resources folder does not exist within jar!")
+        val dfmPlaylists = cls.getResourceAsStream("/dfm/").use { s ->
+            BufferedReader(InputStreamReader(s)).use(BufferedReader::readLines)
+        }.map { it.dropLast(4) }
 
-        val dfmPlaylists = File(dfmFolder).list()!!.map { it.dropLast(4) }
         cache = HashMap(dfmPlaylists.size)
 
         for (playlist in dfmPlaylists) {
