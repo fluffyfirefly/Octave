@@ -25,6 +25,8 @@
 package gg.octave.bot.utils
 
 import org.apache.commons.io.IOUtils
+import org.reflections.Reflections
+import org.reflections.scanners.ResourcesScanner
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.File
@@ -36,9 +38,9 @@ class DiscordFM {
 
     init {
         val cls = this::class.java
-        val dfmPlaylists = cls.getResourceAsStream("/dfm/").use { s ->
-            BufferedReader(InputStreamReader(s)).use(BufferedReader::readLines)
-        }.map { it.dropLast(4) }
+        val dfmPlaylists = Reflections("dfm", ResourcesScanner())
+            .getResources(".*\\.txt".toPattern())
+            .map { it.drop(4).dropLast(4) }
 
         cache = HashMap(dfmPlaylists.size)
 
