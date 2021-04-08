@@ -240,8 +240,8 @@ class FlightEventAdapter : DefaultCommandEventAdapter() {
                 vc != null && vc.members.filter { !it.user.isBot }.all { it.idLong == ctx.author.idLong }
             }
             val djRole = data.command.djRole
-            val djRolePresent = djRole?.let(ctx.member!!::hasAnyRoleId)
-                ?: data.music.djRoles.any(ctx.member!!::hasAnyRoleId)
+            val djRolePresent = (djRole?.let(ctx.member!!::hasAnyRoleId) ?: false)
+                || data.music.djRoles.any(ctx.member!!::hasAnyRoleId)
 
             val admin = ctx.member!!.hasPermission(Permission.MANAGE_SERVER)
 
