@@ -107,7 +107,7 @@ class Playlists : Cog {
         })
     }
 
-    @SubCommand(description = "Share a custom playlist).")
+    @SubCommand(description = "Share a custom playlist.")
     fun share(ctx: Context, @Greedy name: String) {
         val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
             ?: return ctx.send("You don't have any playlists with that name.")
