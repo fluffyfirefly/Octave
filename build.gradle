@@ -45,14 +45,14 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 repositories {
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://dl.bintray.com/natanbc/maven' }
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     maven {
         url 'https://m2.dv8tion.net/releases'
         name 'm2-dv8tion'
     }
     jcenter()
+    maven { url 'https://dl.bintray.com/natanbc/maven' }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
