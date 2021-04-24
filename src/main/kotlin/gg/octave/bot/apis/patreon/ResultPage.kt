@@ -24,8 +24,10 @@
 
 package gg.octave.bot.apis.patreon
 
+import gg.octave.bot.apis.patreon.entities.Patron
+
 data class ResultPage(
-    val pledges: List<PatreonUser>,
+    val pledges: List<Patron>,
     val offset: String?,
     val hasMore: Boolean = offset != null
 )

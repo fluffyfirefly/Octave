@@ -76,10 +76,10 @@ object Launcher {
     val commandRatelimiter = Ratelimiter()
 
     lateinit var shardManager: ExtendedShardManager
-        private set // begone foul modifications
+        private set
 
     lateinit var commandClient: CommandClient
-        private set // uwu
+        private set
 
     val loaded: Boolean
         get() = shardManager.shardsRunning == shardManager.shardsTotal

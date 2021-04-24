@@ -25,6 +25,7 @@
 package gg.octave.bot.utils
 
 import okhttp3.*
+import org.apache.commons.io.IOUtils
 import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
@@ -48,6 +49,7 @@ object RequestUtil {
     fun jsonObject(options: Request.Builder.() -> Unit, checkStatus: Boolean): CompletableFuture<JSONObject> {
         return request(options).submit()
             .thenApply {
+                //println(IOUtils.toString(it.body()!!.byteStream()))
                 if (checkStatus && !it.isSuccessful) {
                     throw IllegalStateException("Received invalid status code: ${it.code()}")
                 }

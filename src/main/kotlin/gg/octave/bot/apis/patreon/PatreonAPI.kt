@@ -25,6 +25,7 @@
 package gg.octave.bot.apis.patreon
 
 import gg.octave.bot.Launcher
+import gg.octave.bot.apis.patreon.entities.Patron
 import gg.octave.bot.db.premium.PremiumUser
 import gg.octave.bot.utils.RequestUtil
 import io.sentry.Sentry
@@ -59,7 +60,7 @@ class PatreonAPI(var accessToken: String?) {
             for (entry in storedPledges.filterNot(PremiumUser::isOverride)) {
                 try {
                     val userId = entry.idLong
-                    val pledge = pledges.firstOrNull { it.discordId != null && it.discordId == userId }
+                    val pledge = pledges.firstOrNull { it.discordUserId != null && it.discordUserId == userId }
 
                     if (pledge == null || pledge.isDeclined) {
                         Launcher.shardManager.openPrivateChannel(userId)
@@ -79,7 +80,7 @@ class PatreonAPI(var accessToken: String?) {
                         continue
                     }
 
-                    val pledging = pledge.pledgeCents.toDouble() / 100
+                    val pledging = pledge.entitledAmountCents.toDouble() / 100
 
                     if (pledging < entry.pledgeAmount) { // User is pledging less than what we have stored.
                         entry.setPledgeAmount(pledging).save()
@@ -115,21 +116,64 @@ class PatreonAPI(var accessToken: String?) {
 
     fun fetchPledges(campaignId: String = "754103") = fetchPledgesOfCampaign0(campaignId)
 
-    private fun fetchPledgesOfCampaign0(campaignId: String, offset: String? = null): CompletableFuture<List<PatreonUser>> {
-        val users = mutableListOf<PatreonUser>()
+    private fun fetchPledgesOfCampaign0(campaignId: String, offset: String? = null): CompletableFuture<List<Patron>> {
+        val initialUrl = baseUrl.newBuilder().apply {
+            addPathSegments("api/oauth2/v2/campaigns/$campaignId/members")
+            setQueryParameter("include", "currently_entitled_tiers,user")
+            setQueryParameter("fields[member]", "full_name,last_charge_date,last_charge_status,lifetime_support_cents,currently_entitled_amount_cents,patron_status,pledge_relationship_start")
+            setQueryParameter("fields[user]", "social_connections")
+            setQueryParameter("page[count]", "100")
+        }.build()
 
-        return fetchPageOfPledge(campaignId, offset)
-            .thenCompose {
-                users.addAll(it.pledges)
+        return fetchPageOfPledgeRecursive(initialUrl, mutableListOf())
+//            .thenCompose {
+//                users.addAll(it.pledges)
+//
+//                if (it.hasMore && offset != it.offset) {
+//                    fetchPledgesOfCampaign0(campaignId, it.offset)
+//                } else {
+//                    CompletableFuture.completedFuture(emptyList())
+//                }
+//            }
+//            .thenAccept { users.addAll(it) }
+//            .thenApply { users }
+    }
 
-                if (it.hasMore && offset != it.offset) {
-                    fetchPledgesOfCampaign0(campaignId, it.offset)
-                } else {
-                    CompletableFuture.completedFuture(emptyList())
+    private fun fetchPageOfPledgeRecursive(url: HttpUrl, cache: MutableList<Patron>): CompletableFuture<List<Patron>> {
+        println("fetching...")
+        return request { url(url) }.thenApply {
+            val nextLink = getNextPage(it)
+            val members = it.getJSONArray("data")
+            val users = it.getJSONArray("included")
+            val patrons = mutableListOf<Patron>()
+
+            for (user in users) {
+                val obj = user as JSONObject
+
+                if (obj.getString("type") != "user") {
+                    continue
+                }
+
+                val userId = obj.getString("id")
+                val member = members.firstOrNull { m ->
+                    val mObj = m as JSONObject
+                    val userData = mObj.getJSONObject("relationships").getJSONObject("user").getJSONObject("data")
+                    return@firstOrNull userData.getString("id") == userId
+                }
+
+                if (member != null) {
+                    patrons.add(Patron.from(member as JSONObject, obj))
                 }
             }
-            .thenAccept { users.addAll(it) }
-            .thenApply { users }
+
+            cache.addAll(patrons)
+            nextLink
+        }.thenCompose {
+            when {
+                it != null -> fetchPageOfPledgeRecursive(HttpUrl.get(it), cache)
+                else -> CompletableFuture.completedFuture(cache)
+            }
+        }
     }
 
     private fun fetchPageOfPledge(campaignId: String, offset: String?): CompletableFuture<ResultPage> {
@@ -151,14 +195,20 @@ class PatreonAPI(var accessToken: String?) {
                 }
             }
 
-            ResultPage(users, nextPage)
+            // users
+            ResultPage(listOf(), nextPage)
         }
     }
 
     private fun getNextPage(json: JSONObject): String? {
+        if (json.isNull("links")) {
+            return null
+        }
+
         return json.getJSONObject("links")
             .takeIf { it.has("next") }
-            ?.let { parseQueryString(it.getString("next"))["page[cursor]"] }
+            ?.getString("next")
+            //?.let { parseQueryString(it.getString("next"))["page[cursor]"] }
     }
 
     private fun parseQueryString(url: String): Map<String, String> {
@@ -188,6 +238,6 @@ class PatreonAPI(var accessToken: String?) {
 
     companion object {
         private val log = LoggerFactory.getLogger(PatreonAPI::class.java)
-        private val baseUrl = HttpUrl.get("https://www.patreon.com/api/oauth2")
+        private val baseUrl = HttpUrl.get("https://www.patreon.com/")
     }
 }

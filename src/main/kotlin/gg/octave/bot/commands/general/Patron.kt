@@ -81,7 +81,7 @@ class Patron : Cog {
             .submit()
             .thenCompose { Launcher.patreon.fetchPledges() }
             .thenAccept { pledges ->
-                val pledge = pledges.firstOrNull { it.discordId != null && it.discordId == ctx.author.idLong }
+                val pledge = pledges.firstOrNull { it.discordUserId != null && it.discordUserId == ctx.author.idLong }
                     ?: return@thenAccept ctx.send {
                         setColor(0x9570D3)
                         setDescription(
@@ -91,13 +91,13 @@ class Patron : Cog {
                         )
                     }
 
-                if (pledge.isDeclined || pledge.pledgeCents <= 0) {
+                if (pledge.isDeclined || pledge.entitledAmountCents <= 0) {
                     return@thenAccept ctx.send("It looks like your pledge was declined, or your pledge is too low!\n" +
                         "We are unable to link your account until this is resolved.")
                 }
 
                 //val tierAmount = if (pledge.tier != PatronTier.UNKNOWN) pledge.tier.tierAmountCents.toDouble() else 0.0
-                val pledgeAmount = /*max(tierAmount, */pledge.pledgeCents.toDouble() / 100
+                val pledgeAmount = /*max(tierAmount, */pledge.entitledAmountCents.toDouble() / 100
 
                 val user = PremiumUser(ctx.author.id)
                     .setPledgeAmount(pledgeAmount)
