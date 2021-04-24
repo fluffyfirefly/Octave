@@ -140,7 +140,6 @@ class PatreonAPI(var accessToken: String?) {
     }
 
     private fun fetchPageOfPledgeRecursive(url: HttpUrl, cache: MutableList<Patron>): CompletableFuture<List<Patron>> {
-        println("fetching...")
         return request { url(url) }.thenApply {
             val nextLink = getNextPage(it)
             val members = it.getJSONArray("data")
