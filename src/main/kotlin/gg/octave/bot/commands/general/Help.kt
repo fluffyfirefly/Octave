@@ -36,7 +36,7 @@ import me.devoxin.flight.api.entities.Cog
 
 class Help : Cog {
     private val categoryAlias = mapOf("Search" to "Music", "Dj" to "Music")
-    private val topics = listOf(Dj())
+    //private val topics = listOf(Dj())
 
     @ExperimentalStdlibApi
     @Command(aliases = ["commands", "cmds"], description = "Shows a list of commands, or command information.")
@@ -91,9 +91,9 @@ class Help : Cog {
                 addField(fieldName, commandList, false)
             }
             addBlankField(false)
-            addField("Topics", "You can find more information on hot topics, such as DJ roles/commands or playlists.\n" +
+            /*addField("Topics", "You can find more information on hot topics, such as DJ roles/commands or playlists.\n" +
                 "Simply run `${ctx.trigger}help <TOPIC NAME>` to find out more.\n\n__Available Topics__\n" +
-                topics.joinToString("\n") { "`${it.name.padEnd(10)}:` ${it.description}" }, false)
+                topics.joinToString("\n") { "`${it.name.padEnd(10)}:` ${it.description}" }, false)*/
             setFooter("For more information try ${guildTrigger}help (command) " +
                 "or ${guildTrigger}help (category), ex: ${guildTrigger}help bassboost or ${guildTrigger}help play")
         }
