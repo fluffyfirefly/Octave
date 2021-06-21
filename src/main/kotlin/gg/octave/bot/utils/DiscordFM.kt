@@ -28,10 +28,7 @@ import org.apache.commons.io.IOUtils
 import org.reflections.Reflections
 import org.reflections.scanners.ResourcesScanner
 import org.slf4j.LoggerFactory
-import java.io.BufferedReader
-import java.io.File
 import java.io.IOException
-import java.io.InputStreamReader
 
 class DiscordFM {
     private val cache: HashMap<String, List<String>>
