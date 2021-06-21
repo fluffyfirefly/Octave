@@ -37,7 +37,7 @@ class Previous : MusicCog {
     override fun requirePlayer() = true
 
     @DJ
-    @Command(aliases = ["back", "prev"], description = "Plays the previous song.")
+    @Command(aliases = ["back", "prev", "encore"], description = "Plays the previous song.")
     fun restart(ctx: Context) {
         val manager = ctx.manager
 
