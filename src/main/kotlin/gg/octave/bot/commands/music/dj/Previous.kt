@@ -38,7 +38,7 @@ class Previous : MusicCog {
 
     @DJ
     @Command(aliases = ["back", "prev", "encore"], description = "Plays the previous song.")
-    fun restart(ctx: Context) {
+    fun previous(ctx: Context) {
         val manager = ctx.manager
 
         val track = manager.lastTrack
