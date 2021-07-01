@@ -123,6 +123,7 @@ object Launcher {
             .addCustomParser(KeyTypeParser())
             .addCustomParser(BoostSettingParser())
             .addCustomParser(RepeatOptionParser())
+            .addCustomParser(UserOrIdParser())
             .setOwnerIds(*configuration.admins.toLongArray())
             .addEventListeners(FlightEventAdapter())
             .setExecutionThreadPool(commandExecutor)

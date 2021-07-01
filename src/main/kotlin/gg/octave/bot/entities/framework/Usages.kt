@@ -24,6 +24,8 @@
 
 package gg.octave.bot.entities.framework
 
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
 annotation class Usages(
     vararg val usages: String
 )
