@@ -34,4 +34,5 @@ object OctaveBot {
     val GIT_REVISION = versionTxt[1]
 
     const val DISCORD_INVITE_LINK = "https://discord.gg/musicbot"
+    const val PRIMARY_COLOUR = 0x9570D3
 }

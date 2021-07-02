@@ -22,10 +22,34 @@
  * SOFTWARE.
  */
 
-package gg.octave.bot.entities.framework
+package gg.octave.bot.commands.music.dj
 
-@Retention(AnnotationRetention.RUNTIME)
-@Target(AnnotationTarget.FUNCTION)
-annotation class Usages(
-    vararg val usages: String
-)
+import gg.octave.bot.commands.music.embedTitle
+import gg.octave.bot.entities.framework.DJ
+import gg.octave.bot.entities.framework.MusicCog
+import gg.octave.bot.utils.OctaveBot
+import gg.octave.bot.utils.extensions.manager
+import me.devoxin.flight.api.Context
+import me.devoxin.flight.api.annotations.Command
+
+class Previous : MusicCog {
+    override fun sameChannel() = true
+    override fun requirePlayer() = true
+
+    @DJ
+    @Command(aliases = ["back", "prev", "encore"], description = "Plays the previous song.")
+    fun previous(ctx: Context) {
+        val manager = ctx.manager
+
+        val track = manager.lastTrack
+            ?: return ctx.send("There is no previous track to play.")
+
+        ctx.send {
+            setColor(OctaveBot.PRIMARY_COLOUR)
+            setTitle("Previous Track")
+            setDescription("Playing the previous track `${track.info.embedTitle}`.")
+        }
+
+        manager.player.playTrack(track.makeClone())
+    }
+}

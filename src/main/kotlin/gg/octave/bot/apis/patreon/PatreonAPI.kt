@@ -207,7 +207,7 @@ class PatreonAPI(var accessToken: String?) {
         return json.getJSONObject("links")
             .takeIf { it.has("next") }
             ?.getString("next")
-            //?.let { parseQueryString(it.getString("next"))["page[cursor]"] }
+        //?.let { parseQueryString(it.getString("next"))["page[cursor]"] }
     }
 
     private fun parseQueryString(url: String): Map<String, String> {

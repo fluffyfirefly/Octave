@@ -25,7 +25,6 @@
 package gg.octave.bot.utils
 
 import okhttp3.*
-import org.apache.commons.io.IOUtils
 import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.CompletableFuture

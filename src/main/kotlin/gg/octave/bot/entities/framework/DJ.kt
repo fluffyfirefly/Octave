@@ -24,4 +24,6 @@
 
 package gg.octave.bot.entities.framework
 
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
 annotation class DJ(val ignoreAlone: Boolean = false)

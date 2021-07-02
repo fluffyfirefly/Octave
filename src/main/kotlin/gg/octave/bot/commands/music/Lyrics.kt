@@ -40,7 +40,7 @@ import org.json.JSONException
 import java.util.concurrent.TimeUnit
 
 class Lyrics : Cog {
-    @Command(description = "Shows the lyrics of the current song")
+    @Command(aliases = ["ly"], description = "Shows the lyrics of the current song")
     @Cooldown(duration = 2, timeUnit = TimeUnit.SECONDS, bucket = BucketType.GUILD)
     suspend fun lyrics(ctx: Context) {
         val manager = ctx.launcher.players.getExisting(ctx.guild)

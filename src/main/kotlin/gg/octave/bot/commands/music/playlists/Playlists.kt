@@ -3,7 +3,9 @@ package gg.octave.bot.commands.music.playlists
 import com.sedmelluq.discord.lavaplayer.player.FunctionalResultHandler
 import gg.octave.bot.Launcher
 import gg.octave.bot.db.music.CustomPlaylist
+import gg.octave.bot.entities.framework.HelpGroup
 import gg.octave.bot.entities.framework.Usages
+import gg.octave.bot.entities.framework.UserOrId
 import gg.octave.bot.music.LoadResultHandler
 import gg.octave.bot.music.utils.TrackContext
 import gg.octave.bot.utils.Page
@@ -14,13 +16,16 @@ import me.devoxin.flight.api.annotations.Greedy
 import me.devoxin.flight.api.annotations.SubCommand
 import me.devoxin.flight.api.annotations.Tentative
 import me.devoxin.flight.api.entities.Cog
+import me.devoxin.flight.internal.arguments.types.Snowflake
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.entities.User
 import java.net.URL
 
 class Playlists : Cog {
     @Command(aliases = ["pl", "cpl"], description = "Manage your custom playlists.")
     fun playlists(ctx: Context) = DEFAULT_SUBCOMMAND(ctx)
 
+    @HelpGroup("General")
     @SubCommand(description = "Lists all of your custom playlists.")
     fun list(ctx: Context, page: Int = 1) {
         val allPlaylists = ctx.db.getCustomPlaylistsAsList(ctx.author.id).takeIf { it.isNotEmpty() }
@@ -52,6 +57,7 @@ class Playlists : Cog {
         }
     }
 
+    @HelpGroup("Management")
     @SubCommand(aliases = ["new", "add", "+"], description = "Create a new custom playlist.")
     fun create(ctx: Context, @Greedy name: String) {
         if (!checkQuota(ctx)) {
@@ -74,6 +80,7 @@ class Playlists : Cog {
         }
     }
 
+    @HelpGroup("Management")
     @SubCommand(aliases = ["del", "remove", "-"], description = "Delete one of your custom playlists.")
     fun delete(ctx: Context, @Greedy name: String) {
         val existingPlaylist = ctx.db.getCustomPlaylistByNameOrId(ctx.author.id, name)
@@ -92,7 +99,8 @@ class Playlists : Cog {
         }
     }
 
-    @SubCommand(aliases = ["manage"], description = "Edit an existing playlist (move/remove/...)")
+    @HelpGroup("Management")
+    @SubCommand(aliases = ["manage", "modify"], description = "Edit an existing playlist (move/remove/...)")
     fun edit(ctx: Context, @Greedy name: String) {
         val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
             ?: return ctx.send("You don't have any playlists with that name.")
@@ -107,42 +115,7 @@ class Playlists : Cog {
         })
     }
 
-    @SubCommand(description = "Share a custom playlist.")
-    fun share(ctx: Context, @Greedy name: String) {
-        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
-            ?: return ctx.send("You don't have any playlists with that name.")
-
-        if (!existingPlaylist.isExposed) {
-            return ctx.send {
-                setColor(0x9571D3)
-                setTitle("Whoops...")
-                setDescription("This playlist is not marked as public. If you wish to share this playlist, you will need to do the following:\n" +
-                    "**1.** `${ctx.trigger}playlists edit ${existingPlaylist.name}`\n" +
-                    "**2.** `privacy public`\n" +
-                    "**3.** `save`\n" +
-                    "**4.** `${ctx.trigger}playlists share ${existingPlaylist.name}`")
-            }
-        }
-
-        ctx.send {
-            setColor(0x9571D3)
-            setTitle("Sharing playlist \"${existingPlaylist.name}\"")
-            setDescription(
-                "Your unique playlist ID is `${existingPlaylist.id}`.\n" +
-                    "Share this with your friends - it will allow them to play your playlist and even clone it!\n\n" +
-                    "Playing a shared playlist -> `${ctx.trigger}playlists play ${existingPlaylist.id}`\n" +
-                    "Cloning a shared playlist -> `${ctx.trigger}playlists clone ${existingPlaylist.id}`"
-            )
-            addField(
-                "Changed your mind?",
-                "Simply head over to the playlist editor (`${ctx.trigger}playlists edit ${existingPlaylist.name}`) and " +
-                    "set the privacy to private!",
-                false
-            )
-            setFooter("Sharing is caring 👏")
-        }
-    }
-
+    @HelpGroup("General")
     @SubCommand(description = "Import a playlist from YouTube/SoundCloud/...")
     fun import(ctx: Context, url: URL, @Greedy name: String?) {
         if (!checkQuota(ctx)) {
@@ -181,6 +154,7 @@ class Playlists : Cog {
         Launcher.players.playerManager.loadItem(url.toString(), loader)
     }
 
+    @HelpGroup("General")
     @SubCommand(aliases = ["copy", "yoink", "steal"], description = "Clone a public playlist to your library!")
     fun clone(ctx: Context, playlistId: String, @Greedy rename: String?) {
         if (!checkQuota(ctx)) {
@@ -227,6 +201,7 @@ class Playlists : Cog {
         }
     }
 
+    @HelpGroup("General")
     @SubCommand(aliases = ["play"], description = "Loads a custom playlist for playing.")
     @Usages("On Repeat", "yes Top Songs 2020")
     fun load(ctx: Context, @Tentative shuffle: Boolean = false, @Greedy name: String) {
@@ -269,9 +244,50 @@ class Playlists : Cog {
         lrh.playlistLoaded(existingPlaylist.toBasicAudioPlaylist())
     }
 
-    // fun share(ctx: Context, @Greedy name: String)
-    // fun privacy(ctx: Context, setting: ..., @Greedy name: String) // Changes whether a playlist can be viewed by other users.
-    // fun snoop(ctx: Context, user: User) // snoop on other user's custom playlists.
+    @HelpGroup("Collaboration")
+    @SubCommand(description = "Share a custom playlist.")
+    fun share(ctx: Context, @Greedy name: String) {
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
+            ?: return ctx.send("You don't have any playlists with that name.")
+
+        if (!existingPlaylist.isExposed) {
+            return ctx.send {
+                setColor(0x9571D3)
+                setTitle("Whoops...")
+                setDescription("This playlist is not marked as public. If you wish to share this playlist, you will need to do the following:\n" +
+                    "**1.** `${ctx.trigger}playlists edit ${existingPlaylist.name}`\n" +
+                    "**2.** `privacy public`\n" +
+                    "**3.** `save`\n" +
+                    "**4.** `${ctx.trigger}playlists share ${existingPlaylist.name}`")
+            }
+        }
+
+        ctx.send {
+            setColor(0x9571D3)
+            setTitle("Sharing playlist \"${existingPlaylist.name}\"")
+            setDescription(
+                "Your unique playlist ID is `${existingPlaylist.id}`.\n" +
+                    "Share this with your friends - it will allow them to play your playlist and even clone it!\n\n" +
+                    "Playing a shared playlist -> `${ctx.trigger}playlists play ${existingPlaylist.id}`\n" +
+                    "Cloning a shared playlist -> `${ctx.trigger}playlists clone ${existingPlaylist.id}`"
+            )
+            addField(
+                "Changed your mind?",
+                "Simply head over to the playlist editor (`${ctx.trigger}playlists edit ${existingPlaylist.name}`) and " +
+                    "set the privacy to private!",
+                false
+            )
+            setFooter("Sharing is caring 👏")
+        }
+    }
+
+    @HelpGroup("Collaboration")
+    @SubCommand(aliases = ["collaborate", "col", "c"], description = "Add/remove users to playlists.")
+    fun collab(ctx: Context, playlist: String, @Greedy userOrId: UserOrId) {
+        if (userOrId == null) {
+
+        }
+    }
 
     // Perhaps track how many times a playlist has been cloned, and show it in a leaderboard thing.
     //  - "Top cloned playlists"
