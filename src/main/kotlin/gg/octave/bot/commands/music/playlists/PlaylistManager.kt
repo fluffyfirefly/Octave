@@ -34,8 +34,10 @@ import io.sentry.Sentry
 import me.devoxin.flight.api.Context
 import net.dv8tion.jda.api.EmbedBuilder
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import org.jetbrains.kotlin.utils.addToStdlib.sumByLong
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeoutException
 import kotlin.math.ceil
 
@@ -44,6 +46,8 @@ class PlaylistManager(
     private val ctx: Context,
     private var msg: Message
 ) {
+    private lateinit var playlistAuthor: User
+
     private val originalName = playlist.name
     private val tracks = playlist.decodedTracks
 
@@ -57,8 +61,17 @@ class PlaylistManager(
         }
 
     init {
-        renderPage()
-        waitForInput()
+        val future = when (playlist.author) {
+            ctx.author.id -> CompletableFuture.completedFuture(ctx.author)
+            else -> ctx.jda.retrieveUserById(playlist.author, false).submit()
+        }
+
+        future.thenAccept { playlistAuthor = it }
+            .exceptionally { playlistAuthor = ctx.author; return@exceptionally null }
+            .whenComplete { _, _ ->
+                renderPage()
+                waitForInput()
+            }
     }
 
     // COMMAND HANDLING
@@ -116,7 +129,7 @@ class PlaylistManager(
         val lockStatus = if (playlist.isExposed) "\uD83D\uDD13" else "\uD83D\uDD12"
         val embed = EmbedBuilder().apply {
             setColor(0x9571D3)
-            setTitle("Editing ${playlist.name} | ${ctx.author.name}'s playlist ($lockStatus)")
+            setTitle("Editing ${playlist.name} | ${playlistAuthor.name}'s playlist ($lockStatus)")
             setDescription(trackList)
             addField(
                 "The bot will be listening for commands until you run `save` or `exit`, or no commands are sent for 20 seconds.",
@@ -152,7 +165,7 @@ class PlaylistManager(
                 is TimeoutException -> {
                     msg.editMessage(EmbedBuilder().apply {
                         setColor(0x9571D3)
-                        setTitle("Editing ${playlist.name} | ${ctx.author.name}'s playlist")
+                        setTitle("Editing ${playlist.name} | ${playlistAuthor.name}'s playlist")
                         setDescription(
                             "This editor has timed out. Any pending changes have been automatically saved.\n" +
                                 "If you haven't finished editing, you can send `${ctx.trigger}playlist edit ${playlist.name}` to " +

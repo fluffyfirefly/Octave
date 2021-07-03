@@ -8,6 +8,7 @@ import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.entities.framework.UserOrId
 import gg.octave.bot.music.LoadResultHandler
 import gg.octave.bot.music.utils.TrackContext
+import gg.octave.bot.utils.OctaveBot
 import gg.octave.bot.utils.Page
 import gg.octave.bot.utils.extensions.*
 import me.devoxin.flight.api.Context
@@ -18,7 +19,10 @@ import me.devoxin.flight.api.annotations.Tentative
 import me.devoxin.flight.api.entities.Cog
 import me.devoxin.flight.internal.arguments.types.Snowflake
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.interactions.components.ActionRow
+import net.dv8tion.jda.api.interactions.components.Button
 import java.net.URL
 
 class Playlists : Cog {
@@ -283,11 +287,63 @@ class Playlists : Cog {
 
     @HelpGroup("Collaboration")
     @SubCommand(aliases = ["collaborate", "col", "c"], description = "Add/remove users to playlists.")
-    fun collab(ctx: Context, playlist: String, @Greedy userOrId: UserOrId) {
-        if (userOrId == null) {
+    fun collab(ctx: Context, playlistName: String, @Greedy userOrId: UserOrId?) {
+        val playlist = ctx.db.findCustomPlaylist(ctx.author.id, playlistName)
+            ?: return ctx.send("You don't have any playlists with that name.")
 
+        if (userOrId == null) {
+            return ctx.send {
+                setColor(OctaveBot.PRIMARY_COLOUR)
+                setTitle("Collaborators for playlist '${playlist.name}'")
+
+                if (playlist.collaboratorIds.isEmpty()) {
+                    setDescription(
+                        "There are no collaborators for this playlist.\n" +
+                        "Run this command again but with a user mention/user ID to add someone.\n" +
+                        "You can have up to 3 collaborators."
+                    )
+                } else {
+                    val collaborators = playlist.collaboratorIds.joinToString("\n") { "**<@$it>** ($it)" }
+                    setDescription(
+                        "There are **${playlist.collaboratorIds.size}** collaborator(s).\n\n$collaborators\n\n" +
+                        "If there are usernames missing, then the users are either not visible to your client, or no longer exist.\n" +
+                            "Should you want to remove any collaborators, you can copy their user ID (in the parenthesis), " +
+                            "and run the command `${ctx.trigger}playlists collab USER_ID` to remove them.\n" +
+                            "Still unsure? **[Join our support server](${OctaveBot.DISCORD_INVITE_LINK})**"
+                    )
+                }
+            }
+        }
+
+        val targetUser = (userOrId.user?.idLong ?: userOrId.userId).toString()
+        
+        if (!playlist.collaboratorIds.contains(targetUser) && userOrId.user == null) {
+            return ctx.send { // Only accept ADDING users via mentions to prevent invalid users from being added.
+                setColor(OctaveBot.PRIMARY_COLOUR)
+                setTitle("Unknown User")
+                setDescription("You must mention the user that you want to add as a playlist collaborator.")
+            }
+        }
+
+        val userAdded = playlist.collaboratorIds.toggle(targetUser)
+        val action = if (userAdded) "Added" else "Removed"
+        playlist.save()
+        
+        ctx.send {
+            setColor(OctaveBot.PRIMARY_COLOUR)
+            setTitle("Collaborator $action")
+            setDescription("The user **<@$targetUser>** has been ${action.toLowerCase()} as a playlist collaborator.")
         }
     }
+
+    // TODO: List collaborative playlists under the "List" command.
+    // TODO: Make collaborative playlists accessible to the "Edit" command.
+
+    // BUTTON TESTING BELOW
+//        val actionRow = ActionRow.of(Button.success("test:hehe", "hello world"))
+//        ctx.messageChannel.sendMessage(MessageBuilder().setContent("hello").setActionRows(actionRow).build()).queue()
+    // BUTTON TESTING ABOVE
+
 
     // Perhaps track how many times a playlist has been cloned, and show it in a leaderboard thing.
     //  - "Top cloned playlists"
@@ -325,5 +381,21 @@ class Playlists : Cog {
 
             append("\n")
         }
+    }
+
+    /**
+     * Toggles an element in a set. If it exists, it's removed. If it doesn't, it's added.
+     * @return True if the element is in the set after toggling.
+     */
+    private fun <T> MutableSet<T>.toggle(e: T): Boolean {
+        val existsInSet = this.contains(e)
+
+        if (existsInSet) {
+            this.remove(e)
+        } else {
+            this.add(e)
+        }
+
+        return !existsInSet
     }
 }

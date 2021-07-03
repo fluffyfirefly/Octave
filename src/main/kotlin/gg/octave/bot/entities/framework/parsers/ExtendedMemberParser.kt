@@ -28,6 +28,9 @@ import me.devoxin.flight.api.Context
 import me.devoxin.flight.internal.parsers.MemberParser
 import me.devoxin.flight.internal.parsers.Parser
 import net.dv8tion.jda.api.entities.Member
+import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.internal.entities.MemberImpl
+import net.dv8tion.jda.internal.entities.UserImpl
 import java.util.*
 
 class ExtendedMemberParser : Parser<Member> {
@@ -35,7 +38,7 @@ class ExtendedMemberParser : Parser<Member> {
         val parsed = defaultMemberParser.parse(ctx, param)
 
         return parsed.or {
-            val mentioned = ctx.message.mentionedMembers.firstOrNull { it.asMention == param }
+            val mentioned = ctx.message.mentionedMembers.firstOrNull { "<@${it.id}>" == param || "<@!${it.id}>" == param }
             Optional.ofNullable(mentioned)
         }
     }
