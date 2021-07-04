@@ -100,6 +100,11 @@ public class CustomPlaylist extends ManagedObject {
     }
 
     @JsonIgnore
+    public boolean isCollaborator(String userId) {
+        return collaboratorIds.contains(userId);
+    }
+
+    @JsonIgnore
     public boolean isImported() {
         return imported;
     }

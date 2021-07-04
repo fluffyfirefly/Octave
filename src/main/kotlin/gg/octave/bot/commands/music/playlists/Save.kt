@@ -22,7 +22,7 @@ class Save : Cog {
         val track = ctx.existingManager?.player?.playingTrack
             ?: return ctx.send("There's no player here.") // Shouldn't happen.
 
-        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, playlist)
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, playlist, true)
             ?: return ctx.send("No custom playlists found with that name.")
 
         existingPlaylist.addTrack(track.makeClone())
@@ -40,7 +40,7 @@ class Save : Cog {
         val manager = ctx.existingManager
             ?: return ctx.send("There's no player here.") // Shouldn't happen.
 
-        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, playlist)
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, playlist, true)
             ?: return ctx.send("No custom playlists found with that name.")
 
         if (manager.queue.isEmpty()) {
@@ -60,7 +60,7 @@ class Save : Cog {
 
     @Command(description = "Searches for, and adds a track to a playlist.")
     fun add(ctx: Context, playlist: String, @Greedy query: String) {
-        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, playlist)
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, playlist, true)
             ?: return ctx.send("No custom playlists found with that name.")
 
         val handler = FunctionalResultHandler(

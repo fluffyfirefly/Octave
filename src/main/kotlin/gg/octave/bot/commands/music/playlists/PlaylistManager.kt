@@ -218,6 +218,7 @@ class PlaylistManager(
                 true
             }
             "privacy" -> {
+                // TODO: Consider preventing privacy changes for collaborators?
                 val arg = args.firstOrNull()?.toLowerCase()
 
                 if (arg != "private" && arg != "public") {
@@ -235,6 +236,7 @@ class PlaylistManager(
                 true
             }
             "rename" -> {
+                // TODO: Consider preventing privacy changes for collaborators?
                 val newName = args.joinToString(" ").takeIf { it.isNotEmpty() }
 
                 if (newName == null) {
