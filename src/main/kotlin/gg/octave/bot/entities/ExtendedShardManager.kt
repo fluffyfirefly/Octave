@@ -71,7 +71,7 @@ class ExtendedShardManager(private val shardManager: ShardManager) : ShardManage
 
                     // Performance
                     setBulkDeleteSplittingEnabled(false)
-                    disableCache(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS, CacheFlag.ROLE_TAGS))
+                    disableCache(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS, CacheFlag.ROLE_TAGS, CacheFlag.ONLINE_STATUS))
                     setMemberCachePolicy(MemberCachePolicy.VOICE)
                     setChunkingFilter(ChunkingFilter.NONE)
                 }

@@ -8,6 +8,7 @@ import gg.octave.bot.entities.framework.Usages
 import gg.octave.bot.entities.framework.UserOrId
 import gg.octave.bot.music.LoadResultHandler
 import gg.octave.bot.music.utils.TrackContext
+import gg.octave.bot.utils.OctaveBot
 import gg.octave.bot.utils.Page
 import gg.octave.bot.utils.extensions.*
 import me.devoxin.flight.api.Context
@@ -18,8 +19,12 @@ import me.devoxin.flight.api.annotations.Tentative
 import me.devoxin.flight.api.entities.Cog
 import me.devoxin.flight.internal.arguments.types.Snowflake
 import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.MessageBuilder
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.interactions.components.ActionRow
+import net.dv8tion.jda.api.interactions.components.Button
 import java.net.URL
+import kotlin.math.max
 
 class Playlists : Cog {
     @Command(aliases = ["pl", "cpl"], description = "Manage your custom playlists.")
@@ -28,33 +33,48 @@ class Playlists : Cog {
     @HelpGroup("General")
     @SubCommand(description = "Lists all of your custom playlists.")
     fun list(ctx: Context, page: Int = 1) {
-        val allPlaylists = ctx.db.getCustomPlaylistsAsList(ctx.author.id).takeIf { it.isNotEmpty() }
+        val allPlaylists = ctx.db.getCustomPlaylistsAsList(ctx.author.id)
+            .plus(ctx.db.getCollaboratorPlaylistsAsList(ctx.author.id))
+            .takeIf { it.isNotEmpty() }
             ?: return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("No Playlists :(")
                 setDescription("That's OK! You can create a new one with `${ctx.trigger}playlists create <name>`\n*Without the `<>` of course.*")
             }
 
-        val octavePlaylists = allPlaylists.filter { !it.isImported }
-        val memerPlaylists = allPlaylists.filter { it.isImported }
+        val selfPlaylists = allPlaylists.filter { it.author == ctx.author.id }
+        val collabPlaylists = allPlaylists.filter { it.author != ctx.author.id }
+        val octavePlaylists = selfPlaylists.filter { !it.isImported }
+        val memerPlaylists = selfPlaylists.filter { it.isImported }
 
         val octavePage = Page.paginate(octavePlaylists, page, "", ::formatPlaylist)
         val memerPage = Page.paginate(memerPlaylists, page, "", ::formatPlaylist)
+        val collabPage = Page.paginate(collabPlaylists, page, "", ::formatPlaylist)
 
-        val showing = octavePage.elementCount + memerPage.elementCount
-        val total = octavePlaylists.size + memerPlaylists.size
+        val showing = octavePage.elementCount + memerPage.elementCount + collabPage.elementCount
+        val total = octavePlaylists.size + memerPlaylists.size + collabPlaylists.size
+        val currentPage = max(octavePage.page, max(memerPage.page, collabPage.page))
 
         ctx.send {
-            setColor(0x9571D3)
+            setColor(OctaveBot.PRIMARY_COLOUR)
             setTitle("Your Playlists")
 
             addField("Playlists (${octavePage.maxPages.plural("page")})", octavePage.content, true)
-            if (memerPage.content.isNotEmpty()) {
+
+            if (collabPage.elementCount > 0) {
+                addField("Collaborations (${collabPage.maxPages.plural("page")})", collabPage.content, true)
+            }
+
+            if (memerPage.elementCount > 0) {
                 addField("Imported (${memerPage.maxPages.plural("page")})", memerPage.content, true)
             }
 
-            setFooter("Showing $showing of $total playlists • Page ${octavePage.page} • Specify a page to go to.")
+            setFooter("Showing $showing of $total playlists • Page $currentPage • Specify a page to go to.")
         }
+
+        // TODO: Introduce way of resigning as collaborator/prevent re-assignment?
+        // TODO: Collaboration limit?
+        // TODO: Implement HelpGroups
     }
 
     @HelpGroup("Management")
@@ -74,7 +94,7 @@ class Playlists : Cog {
             .save()
 
         ctx.send {
-            setColor(0x9571D3)
+            setColor(OctaveBot.PRIMARY_COLOUR)
             setTitle("Your Playlists")
             setDescription("Your shiny new playlist has been created.")
         }
@@ -85,7 +105,7 @@ class Playlists : Cog {
     fun delete(ctx: Context, @Greedy name: String) {
         val existingPlaylist = ctx.db.getCustomPlaylistByNameOrId(ctx.author.id, name)
             ?: return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Your Playlists")
                 setDescription("No custom playlists found with that name.\nTo prevent accidental deletion, you need to enter the full playlist name.")
             }
@@ -93,7 +113,7 @@ class Playlists : Cog {
         existingPlaylist.delete()
 
         ctx.send {
-            setColor(0x9571D3)
+            setColor(OctaveBot.PRIMARY_COLOUR)
             setTitle("Your Playlists")
             setDescription("Your custom playlist has been removed.")
         }
@@ -102,11 +122,11 @@ class Playlists : Cog {
     @HelpGroup("Management")
     @SubCommand(aliases = ["manage", "modify"], description = "Edit an existing playlist (move/remove/...)")
     fun edit(ctx: Context, @Greedy name: String) {
-        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
-            ?: return ctx.send("You don't have any playlists with that name.")
+        val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name, true)
+            ?: return ctx.send("No playlists found belonging to you with that name/ID, or that you collaborate on.")
 
         ctx.messageChannel.sendMessage(EmbedBuilder().apply {
-            setColor(0x9571D3)
+            setColor(OctaveBot.PRIMARY_COLOUR)
             setDescription("Loading playlist...")
         }.build()).queue({
             PlaylistManager(existingPlaylist, ctx, it)
@@ -133,8 +153,10 @@ class Playlists : Cog {
                 val existing = ctx.db.getCustomPlaylist(ctx.author.id, importName)
 
                 if (existing != null) {
-                    return@FunctionalResultHandler ctx.send("A playlist with that name already exists. Specify a different one.")
-                    // Maybe we could append tracks to a playlist here? TODO, or, INVESTIGATE
+                    return@FunctionalResultHandler ctx.send(
+                        "A playlist with that name already exists. Specify a different one.\n" +
+                        "If you're trying to import tracks into an existing playlist, use the `${ctx.trigger}add` command."
+                    )
                 }
 
                 val playlist = CustomPlaylist.createWith(ctx.author.id, importName)
@@ -142,7 +164,7 @@ class Playlists : Cog {
                 playlist.save()
 
                 ctx.send {
-                    setColor(0x9571D3)
+                    setColor(OctaveBot.PRIMARY_COLOUR)
                     setTitle("Playlist Imported")
                     setDescription("The playlist `${it.name}` has been imported as `$importName` successfully!")
                 }
@@ -166,7 +188,7 @@ class Playlists : Cog {
 
         if (playlist.author == ctx.author.id) {
             return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Whoops...")
                 setDescription("You can't clone your own playlist.")
             }
@@ -174,7 +196,7 @@ class Playlists : Cog {
 
         if (!playlist.isExposed) {
             return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Whoops...")
                 setDescription("The playlist you're trying to clone is set to private.")
                 setFooter("🥺 lemme clone your playlist bro")
@@ -183,7 +205,7 @@ class Playlists : Cog {
 
         if (ctx.db.getCustomPlaylist(ctx.author.id, rename ?: playlist.name) != null) {
             return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Whoops...")
                 setDescription("You already have a playlist with the same name as the one you're cloning.\n" +
                     "Re-run the command but specify a new name.\nExample: `${ctx.trigger}playlists clone $playlistId My New Playlist Except It's Stolen`")
@@ -195,7 +217,7 @@ class Playlists : Cog {
         clonedPlaylist.save()
 
         ctx.send {
-            setColor(0x9571D3)
+            setColor(OctaveBot.PRIMARY_COLOUR)
             setTitle("Playlist Cloned")
             setDescription("Successfully cloned `${playlist.name}` to your library.")
         }
@@ -208,14 +230,14 @@ class Playlists : Cog {
         when {
             ctx.voiceChannel == null -> {
                 return ctx.send {
-                    setColor(0x9571D3)
+                    setColor(OctaveBot.PRIMARY_COLOUR)
                     setTitle("Your Playlists")
                     setDescription("You need to be in a voice channel to load a playlist.")
                 }
             }
             ctx.guild!!.selfMember.voiceState?.channel != null && ctx.voiceChannel != ctx.guild!!.selfMember.voiceState?.channel -> {
                 return ctx.send {
-                    setColor(0x9571D3)
+                    setColor(OctaveBot.PRIMARY_COLOUR)
                     setTitle("Your Playlists")
                     setDescription("The bot is already playing music in another channel.")
                 }
@@ -225,14 +247,14 @@ class Playlists : Cog {
         val existingPlaylist = ctx.db.findCustomPlaylist(ctx.author.id, name)
             ?: name.takeIf { it.length == 5 }?.let(ctx.db::getCustomPlaylistById)
             ?: return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Unknown Playlist")
                 setDescription("There were no playlists found with that name/ID.")
             }
 
         if (!existingPlaylist.isExposed && existingPlaylist.author != ctx.author.id) {
             return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Whoops...")
                 setDescription("The playlist you're trying to play is set to private.")
                 setFooter("🥺 lemme play your playlist bro")
@@ -252,7 +274,7 @@ class Playlists : Cog {
 
         if (!existingPlaylist.isExposed) {
             return ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Whoops...")
                 setDescription("This playlist is not marked as public. If you wish to share this playlist, you will need to do the following:\n" +
                     "**1.** `${ctx.trigger}playlists edit ${existingPlaylist.name}`\n" +
@@ -263,7 +285,7 @@ class Playlists : Cog {
         }
 
         ctx.send {
-            setColor(0x9571D3)
+            setColor(OctaveBot.PRIMARY_COLOUR)
             setTitle("Sharing playlist \"${existingPlaylist.name}\"")
             setDescription(
                 "Your unique playlist ID is `${existingPlaylist.id}`.\n" +
@@ -283,11 +305,60 @@ class Playlists : Cog {
 
     @HelpGroup("Collaboration")
     @SubCommand(aliases = ["collaborate", "col", "c"], description = "Add/remove users to playlists.")
-    fun collab(ctx: Context, playlist: String, @Greedy userOrId: UserOrId) {
-        if (userOrId == null) {
+    fun collab(ctx: Context, playlistName: String, @Greedy userOrId: UserOrId?) {
+        val playlist = ctx.db.findCustomPlaylist(ctx.author.id, playlistName)
+            ?: return ctx.send("You don't have any playlists with that name.")
 
+        if (userOrId == null) {
+            return ctx.send {
+                setColor(OctaveBot.PRIMARY_COLOUR)
+                setTitle("Collaborators for playlist '${playlist.name}'")
+
+                if (playlist.collaboratorIds.isEmpty()) {
+                    setDescription(
+                        "There are no collaborators for this playlist.\n" +
+                        "Run this command again but with a user mention/user ID to add someone.\n" +
+                        "You can have up to 3 collaborators."
+                    )
+                } else {
+                    val collaborators = playlist.collaboratorIds.joinToString("\n") { "**<@$it>** ($it)" }
+                    setDescription(
+                        "There are **${playlist.collaboratorIds.size}** collaborator(s).\n\n$collaborators\n\n" +
+                        "If there are usernames missing, then the users are either not visible to your client, or no longer exist.\n" +
+                            "Should you want to remove any collaborators, you can copy their user ID (in the parenthesis), " +
+                            "and run the command `${ctx.trigger}playlists collab USER_ID` to remove them.\n" +
+                            "Still unsure? **[Join our support server](${OctaveBot.DISCORD_INVITE_LINK})**"
+                    )
+                }
+            }
+        }
+
+        val targetUser = (userOrId.user?.idLong ?: userOrId.userId).toString()
+        
+        if (!playlist.collaboratorIds.contains(targetUser) && userOrId.user == null) {
+            return ctx.send { // Only accept ADDING users via mentions to prevent invalid users from being added.
+                setColor(OctaveBot.PRIMARY_COLOUR)
+                setTitle("Unknown User")
+                setDescription("You must mention the user that you want to add as a playlist collaborator.")
+            }
+        }
+
+        val userAdded = playlist.collaboratorIds.toggle(targetUser)
+        val action = if (userAdded) "Added" else "Removed"
+        playlist.save()
+        
+        ctx.send {
+            setColor(OctaveBot.PRIMARY_COLOUR)
+            setTitle("Collaborator $action")
+            setDescription("The user **<@$targetUser>** has been ${action.toLowerCase()} as a playlist collaborator.")
         }
     }
+
+    // BUTTON TESTING BELOW
+//        val actionRow = ActionRow.of(Button.success("test:hehe", "hello world"))
+//        ctx.messageChannel.sendMessage(MessageBuilder().setContent("hello").setActionRows(actionRow).build()).queue()
+    // BUTTON TESTING ABOVE
+
 
     // Perhaps track how many times a playlist has been cloned, and show it in a leaderboard thing.
     //  - "Top cloned playlists"
@@ -299,7 +370,7 @@ class Playlists : Cog {
 
         if (quota <= 0) {
             ctx.send {
-                setColor(0x9571D3)
+                setColor(OctaveBot.PRIMARY_COLOUR)
                 setTitle("Your Playlists")
                 setDescription("You don't have any remaining custom playlist slots.\n[Donate for more slots](http://patreon.com/octavebot)")
             }
@@ -325,5 +396,21 @@ class Playlists : Cog {
 
             append("\n")
         }
+    }
+
+    /**
+     * Toggles an element in a set. If it exists, it's removed. If it doesn't, it's added.
+     * @return True if the element is in the set after toggling.
+     */
+    private fun <T> MutableSet<T>.toggle(e: T): Boolean {
+        val existsInSet = this.contains(e)
+
+        if (existsInSet) {
+            this.remove(e)
+        } else {
+            this.add(e)
+        }
+
+        return !existsInSet
     }
 }

@@ -35,7 +35,9 @@ import gg.octave.bot.utils.Utils;
 
 import java.beans.ConstructorProperties;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CustomPlaylist extends ManagedObject {
@@ -46,6 +48,10 @@ public class CustomPlaylist extends ManagedObject {
     @JsonSerialize
     @JsonDeserialize
     private String name;
+
+    @JsonDeserialize
+    @JsonSerialize
+    private Set<String> collaboratorIds = new HashSet<>();
 
     @JsonSerialize
     @JsonDeserialize
@@ -81,6 +87,21 @@ public class CustomPlaylist extends ManagedObject {
     @JsonIgnore
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    @JsonIgnore
+    public Set<String> getCollaboratorIds() {
+        return collaboratorIds;
+    }
+
+    @JsonIgnore
+    public void setCollaboratorIds(Set<String> collaboratorIds) {
+        this.collaboratorIds = collaboratorIds;
+    }
+
+    @JsonIgnore
+    public boolean isCollaborator(String userId) {
+        return collaboratorIds.contains(userId);
     }
 
     @JsonIgnore
